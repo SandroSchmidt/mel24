@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<head>
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<script src='./data.js'></script>
+<script src='./d3.min.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+    <button onclick="map.setPitch(45);map.setBearing(0)
+zeitgewahlt(0)
+    ">reset</button>
+    <input type="range" onchange="tim = this.value ; zeitgewahlt(this.value)" min=0 max=500 step=1/>
+    <span id="uhr">00:00</span>
+    <button onclick="play = !play">play</button>
+    <!--
+    <input type="range" onchange="map.setPitch(this.value);" min=20 max=90 step=5/>
+    <input type="range" onchange="map.setBearing(this.value);" min=-90 max=90 step=5/>
+  -->
+</body>
+
+<script>
+    play= false
+    //#endregion
+    setInterval(function(){
+       if(play){
+        tim ++
+        if (tim ==500){tim =0 ;play = false}
+        zeitgewahlt(tim)
+       } 
+    },100)
+
+    function convertMinutesToTime(temp) {
+    // Base time of 6:00 AM
+    temp += 60*6
+
+ 
+    const hours = Math.floor(temp / 60);
+    const minutes = temp % 60;
+  
+    // Format hours and minutes into "hh:mm"
+    const formattedHours = String(hours).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    
+    return `${formattedHours}:${formattedMinutes}`;
+}
+
+    function zeitgewahlt(tim)
+    {
+
+
+        d3.select('#uhr').text(convertMinutesToTime(parseInt(tim)))
+
+
+
+        timx = Math.round((mara.length/500) * Math.max(tim-120,0))
+        teilvonmara = mara.slice(Math.max(timx-25,0),timx)  
+        map.getSource('route').setData({    'type': 'Feature',    'properties': {},
+             'geometry': {        'type': 'LineString',        'coordinates': teilvonmara    }})
+
+             timx = Math.round((half.length/150) * Math.max(tim-60,0))
+        teilvonhalf = half.slice(Math.max(timx-15,0),timx)  
+        map.getSource('route2').setData({    'type': 'Feature',    'properties': {},
+             'geometry': {        'type': 'LineString',        'coordinates': teilvonhalf    }})
+
+             timx = Math.round((tenkm.length/50) * Math.max(tim-180,0))
+        teilvontenkm = tenkm.slice(Math.max(timx-10,0),timx)  
+        map.getSource('route3').setData({    'type': 'Feature',    'properties': {},
+             'geometry': {        'type': 'LineString',        'coordinates': teilvontenkm    }})
+
+             timx = Math.round((fivekm.length/30) * Math.max(tim-200,0))
+        teilvonfivekm = fivekm.slice(Math.max(timx-10,0),timx)  
+        map.getSource('route4').setData({    'type': 'Feature',    'properties': {},
+             'geometry': {        'type': 'LineString',        'coordinates': teilvonfivekm    }})
+
+              
+
+              
+
+    }
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJvc2NobWlkdCIsImEiOiJjbHg3bTMxYmwxMXZiMmtzY2tlN3RjNGY5In0.2whcv8hzfzdyukPAXWwSPw';
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11', // Map style to use
+      center:   [
+      144.9736333,
+      -37.8173614
+    ], // Starting position [lng, lat]
+    dragRotate: true,
+      zoom: 15 ,// Starting zoom level
+      pitch: 45, // tilt the map 45 degrees
+      bearing: 0 // rotate the map -17.6 degrees
+    });
+    linesize = 5
+  
+    // Add 3D buildings layer
+    map.on('load', function () {
+      map.addLayer({
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+          'fill-extrusion-color': '#aaa',
+          'fill-extrusion-height': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            15,
+            0,
+            15.05,
+            ['get', 'height']
+          ],
+          'fill-extrusion-base': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            15,
+            0,
+            15.05,
+            ['get', 'min_height']
+          ],
+          'fill-extrusion-opacity': 0.6
+        }
+      });
+    });
+
+    map.on('load', function () {
+    map.addSource('route', {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': mara
+            }
+        }
+    });
+
+    map.addLayer({
+        'id': 'route',
+        'type': 'line',
+        'source': 'route',
+        'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'green',
+            'line-width': linesize
+        }
+    });
+
+    map.addSource('route2', {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': half
+            }
+        }
+    });
+
+    map.addLayer({
+        'id': 'route2',
+        'type': 'line',
+        'source': 'route2',
+        'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'red',
+            'line-width': linesize
+        }
+    });
+
+    map.addSource('route3', {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': tenkm
+            }
+        }
+    });
+
+    map.addLayer({
+        'id': 'route3',
+        'type': 'line',
+        'source': 'route3',
+        'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'black',
+            'line-width': linesize
+        }
+    });
+
+    map.addSource('route4', {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': fivekm
+            }
+        }
+    });
+
+    map.addLayer({
+        'id': 'route4',
+        'type': 'line',
+        'source': 'route4',
+        'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'blue',
+            'line-width': linesize
+        }
+    });
+
+
+  })
+
+
+  waypoints.forEach(waypoint => {
+    const el = document.createElement('div');
+    el.className = 'marker';
+   el.style.backgroundImage = waypoint.icon;
+    el.style.width = '32px';
+    el.style.height = '32px';
+    el.style.backgroundSize = '100%';
+
+    // Create a new marker with the custom element
+    new mapboxgl.Marker(el)
+        .setLngLat(waypoint.coordinates)
+        .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+            .setText(waypoint.name))
+        .addTo(map);
+});
+
+
+
+
+
+
+  
+  </script>
+  </html>

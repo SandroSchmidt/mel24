@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KML Parser</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // Function to parse KML file and extract coordinates
+        function parseKML(file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var xml = $.parseXML(e.target.result);
+                var placemarks = $(xml).find('Placemark');
+                placemarks.each(function() {
+                    var coordinatesStr = $(this).find('coordinates').text().trim();
+                    var coordinatesArray = coordinatesStr.split(' ');
+                    for (var i = 0; i < coordinatesArray.length; i++) {
+                        var coord = coordinatesArray[i].split(',');
+                        coordinates.push([parseFloat(coord[0]), parseFloat(coord[1])]); // Note: reversed lat/lon order
+                    }
+                });
+                console.log(coordinates);
+            };
+            reader.readAsText(file);
+        }
+
+        // Function to handle file selection
+        function handleFileSelect(event) {
+            coordinates = [];
+            var files = event.target.files;
+            if (files.length === 0) return;
+            var file = files[0];
+            parseKML(file);
+            setTimeout(function () {
+                console.log(coordinates);
+                distance = polylineDistance(coordinates);
+                console.log("Total distance: ", distance, " meters");
+
+             
+
+            }, 200);
+        }
+        function sphericalLawOfCosines(coord1, coord2) {
+    const [lat1, lon1] = coord1;
+    const [lat2, lon2] = coord2;
+
+    const toRadians = (angle) => angle * (Math.PI / 180);
+
+    const φ1 = toRadians(lat1);
+    const φ2 = toRadians(lat2);
+    const Δλ = toRadians(lon2 - lon1);
+
+    const R = 6371000; // Radius of the Earth in meters
+    return Math.acos(
+        Math.sin(φ1) * Math.sin(φ2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+    ) * R;
+}
+ 
+        function polylineDistance(coordinates) {
+            let totalDistance = 0;
+            for (let i = 0; i < coordinates.length - 1; i++) {
+                totalDistance += sphericalLawOfCosines(coordinates[i], coordinates[i + 1]);
+            }
+            return Math.round(totalDistance);
+        }
+
+        function listpointdistances(coordinates){
+            for(i=0;i<coordinates.length-1;i++){
+                console.log(haversine(coordinates[i],coordinates[i+1]))
+            }
+        }
+        // Function to interpolate points every 100 meters
+
+
+        function haversine(coord1, coord2) {
+    const [lat1, lon1] = coord1;
+    const [lat2, lon2] = coord2;
+
+    const toRadians = (angle) => angle * (Math.PI / 180);
+
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const R = 6371000; // Radius of the earth in m
+    return R * c; 
+}
+
+function interpolatePoints(start, end, interval) {
+    const points = [];
+    const lat1 = start[0];
+    const lon1 = start[1];
+    const lat2 = end[0];
+    const lon2 = end[1];
+
+    const d = haversine([lat1, lon1], [lat2, lon2]);
+
+    const steps = Math.floor(d / interval);
+    const latStep = (lat2 - lat1) / steps;
+    const lonStep = (lon2 - lon1) / steps;
+
+    for (let i = 0; i <= steps; i++) {
+        const lat = lat1 + i * latStep;
+        const lon = lon1 + i * lonStep;
+        points.push([lat, lon]);
+    }
+
+    return points;
+}
+
+function adjustPoints(coords, targetDistance, tolerance) {
+    const newCoords = [];
+    const maxDistance = targetDistance + tolerance;
+    const minDistance = targetDistance - tolerance;
+
+    newCoords.push(coords[0]); // Start with the first point
+
+    for (let i = 0; i < coords.length; i++) {
+        const start = newCoords[newCoords.length - 1];
+        const end = coords[i];
+        let distance = haversine(start, end);
+
+        if (distance > maxDistance) {
+            // Add intermediate points
+            const interpolatedPoints = interpolatePoints(start, end, targetDistance);
+            newCoords.push(...interpolatedPoints.slice(1)); // Avoid duplicating the start point
+        } else if (distance < minDistance) {
+            // If the next point is too close, skip adding it
+            continue;
+        } else {
+            // If the next point is within the acceptable range, add it
+            newCoords.push(end);
+        }
+    }
+
+    return newCoords;
+}
+    </script>
+</head>
+<body>
+    <h2>KML Parser</h2>
+    <input type="file" id="fileInput" accept=".kml">
+    <button onclick="console.log('distance : '+polylineDistance(coordinates)+' km')">what is the distance</button>
+    <button onclick="listpointdistances(coordinates)">list point distances</button>
+    <button onclick="   console.log(adjustPoints(coordinates, 25, 5));"> add points </button>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+    </script>
+</body>
+</html>
