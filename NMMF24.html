@@ -9,10 +9,13 @@
     <div id="map" style="width: 100%; height: 800px;"></div>
     <button onclick="map.setPitch(45);map.setBearing(0)
 zeitgewahlt(0)
+play = false
     ">reset</button>
-    <input type="range" onchange="tim = this.value ; zeitgewahlt(this.value)" min=0 max=500 step=1/>
+    <input type="range" id ="myRange" onchange="tim = this.value ; zeitgewahlt(this.value)" value=0 min=0 max=500 step=1/>
     <span id="uhr">00:00</span>
-    <button onclick="play = !play">play</button>
+    <button id="playbut" onclick="play = !play;
+    if(!play){d3.select('#playbut').text('play')}else{d3.select('#playbut').text('stop')}
+    ">play</button>
     <!--
     <input type="range" onchange="map.setPitch(this.value);" min=20 max=90 step=5/>
     <input type="range" onchange="map.setBearing(this.value);" min=-90 max=90 step=5/>
@@ -20,8 +23,10 @@ zeitgewahlt(0)
 </body>
 
 <script>
+    delay = {mara:60,half:120,tenkm:90,fivekm:330,twokm:360}
     tim =0 
     play= false
+
     //#endregion
     setInterval(function(){
        if(play){
@@ -49,28 +54,32 @@ zeitgewahlt(0)
     function zeitgewahlt(tim)
     {
 
-
+        d3.select("#myRange").property("value", tim);
         d3.select('#uhr').text(convertMinutesToTime(parseInt(tim)))
+ 
 
 
-
-        timx = Math.round((mara.length/500) * Math.max(tim-120,0))
+        timx = Math.round((mara.length/400) * Math.max(tim-delay.mara,0))
         teilvonmara = mara.slice(Math.max(timx-25,0),timx)  
+        if(timx>0&&timx<500){ markers[10].setLngLat(teilvonmara[teilvonmara.length-1])}else {markers[10].setLngLat([0,0])}
         map.getSource('route').setData({    'type': 'Feature',    'properties': {},
              'geometry': {        'type': 'LineString',        'coordinates': teilvonmara    }})
 
-             timx = Math.round((half.length/150) * Math.max(tim-60,0))
+             timx = Math.round((half.length/150) * Math.max(tim-delay.half,0))
         teilvonhalf = half.slice(Math.max(timx-15,0),timx)  
+       if(timx>0&&timx<800){ markers[11].setLngLat(teilvonhalf[teilvonhalf.length-1])}else {markers[11].setLngLat([0,0])}
         map.getSource('route2').setData({    'type': 'Feature',    'properties': {},
              'geometry': {        'type': 'LineString',        'coordinates': teilvonhalf    }})
 
-             timx = Math.round((tenkm.length/50) * Math.max(tim-180,0))
+             timx = Math.round((tenkm.length/50) * Math.max(tim-delay.tenkm,0))
         teilvontenkm = tenkm.slice(Math.max(timx-10,0),timx)  
+        if(timx>0&&timx<490){ markers[12].setLngLat(teilvontenkm[teilvontenkm.length-1])}else {markers[12].setLngLat([0,0])}
         map.getSource('route3').setData({    'type': 'Feature',    'properties': {},
              'geometry': {        'type': 'LineString',        'coordinates': teilvontenkm    }})
 
-             timx = Math.round((fivekm.length/30) * Math.max(tim-200,0))
+             timx = Math.round((fivekm.length/30) * Math.max(tim-delay.fivekm,0))
         teilvonfivekm = fivekm.slice(Math.max(timx-10,0),timx)  
+        if(timx>0&&timx<490){markers[13].setLngLat(teilvonfivekm[teilvonfivekm.length-1])}else {markers[13].setLngLat([0,0])}
         map.getSource('route4').setData({    'type': 'Feature',    'properties': {},
              'geometry': {        'type': 'LineString',        'coordinates': teilvonfivekm    }})
 
@@ -236,7 +245,7 @@ zeitgewahlt(0)
 
   })
 
-
+markers =[]
   waypoints.forEach(waypoint => {
     const el = document.createElement('div');
     el.className = 'marker';
@@ -246,13 +255,14 @@ zeitgewahlt(0)
     el.style.backgroundSize = '100%';
 
     // Create a new marker with the custom element
-    new mapboxgl.Marker(el)
+  temp=  new mapboxgl.Marker(el)
         .setLngLat(waypoint.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
             .setText(waypoint.name))
         .addTo(map);
+        markers.push(temp)
 });
-
+console.log(markers)
 
 
 
