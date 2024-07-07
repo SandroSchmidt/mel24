@@ -7,22 +7,38 @@
 </head>
 <body>
     <div id="map" style="width: 100%; height: 800px;"></div>
-    <button onclick="map.setPitch(45);map.setBearing(0)
-zeitgewahlt(0)
-play = false
-    ">reset</button>
-    <input type="range" id ="myRange" onchange="tim = this.value ; zeitgewahlt(this.value)" value=0 min=0 max=500 step=1/>
-    <span id="uhr">00:00</span>
+ 
+    
     <button id="playbut" onclick="play = !play;
     if(!play){d3.select('#playbut').text('play')}else{d3.select('#playbut').text('stop')}
     ">play</button>
+       <button onclick="map.setPitch(45);map.setBearing(0)
+       zeitgewahlt(0)
+       tim =0
+       play = false
+           ">reset</button>
+          <span>Time: </span>  <span id="uhr">00:00</span>
+            <input type="range" id ="myRange" style="width: 80%" onchange="tim = this.value ; zeitgewahlt(this.value)" value=0 min=0 max=500 step=1/>
+  
     <!--
     <input type="range" onchange="map.setPitch(this.value);" min=20 max=90 step=5/>
     <input type="range" onchange="map.setBearing(this.value);" min=-90 max=90 step=5/>
   -->
 </body>
-
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+</style>
 <script>
+temp=0
+for(i=0;i<mara.length;i++){
+    temp = Math.max((temp + (Math.random()-0.5)*10),0)
+    mara[i] = [mara[i][0],mara[i][1],parseInt(temp)]
+}
+console.log("te")
+console.log(mara)
+
     delay = {mara:60,half:120,tenkm:90,fivekm:330,twokm:360}
     tim =0 
     play= false
@@ -34,7 +50,7 @@ play = false
         if (tim ==500){tim =0 ;play = false}
         zeitgewahlt(tim)
        } 
-    },100)
+    },200)
 
     function convertMinutesToTime(temp) {
     // Base time of 6:00 AM
@@ -79,7 +95,7 @@ play = false
 
              timx = Math.round((fivekm.length/30) * Math.max(tim-delay.fivekm,0))
         teilvonfivekm = fivekm.slice(Math.max(timx-10,0),timx)  
-        if(timx>0&&timx<490){markers[13].setLngLat(teilvonfivekm[teilvonfivekm.length-1])}else {markers[13].setLngLat([0,0])}
+        if(timx>0&&timx<100){markers[13].setLngLat(teilvonfivekm[teilvonfivekm.length-1])}else {markers[13].setLngLat([0,0])}
         map.getSource('route4').setData({    'type': 'Feature',    'properties': {},
              'geometry': {        'type': 'LineString',        'coordinates': teilvonfivekm    }})
 
@@ -138,6 +154,10 @@ play = false
     });
 
     map.on('load', function () {
+       
+        
+
+        
     map.addSource('route', {
         'type': 'geojson',
         'data': {
@@ -255,7 +275,7 @@ markers =[]
     el.style.backgroundSize = '100%';
 
     // Create a new marker with the custom element
-  temp=  new mapboxgl.Marker(el)
+  temp=  new mapboxgl.Marker(el,{ offset: [0, -16]})
         .setLngLat(waypoint.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
             .setText(waypoint.name))

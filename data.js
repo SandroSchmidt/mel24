@@ -6382,10 +6382,10 @@ half = [
   {    name:"Drink Station 7", coordinates:[144.9699479,-37.8225651],icon:'url(./water.png)'},
   {    name:"Drink Station 8", coordinates:[144.9751729,-37.8159417],icon:'url(./water.png)'},
   {    name:"Finish", coordinates:[144.98369490614368,-37.81943986264025],icon:'url(./finish.png)'},
-  {    name:"42 elite", coordinates:[0,0],icon:'url(./runner.png)'},
-  {    name:"21 elite", coordinates:[0,0],icon:'url(./runner.png)'},
-  {    name:"10 elite", coordinates:[0,0],icon:'url(./runner.png)'},
-  {    name:"5 elite", coordinates:[0,0],icon:'url(./runner.png)'},
+  {    name:"42 elite", coordinates:[0,0],icon:'url(./42.png)'},
+  {    name:"21 elite", coordinates:[0,0],icon:'url(./21.png)'},
+  {    name:"10 elite", coordinates:[0,0],icon:'url(./10.png)'},
+  {    name:"5 elite", coordinates:[0,0],icon:'url(./5.png)'},
 
 
 ]
