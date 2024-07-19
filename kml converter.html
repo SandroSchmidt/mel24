@@ -3,25 +3,184 @@
 <head>
     <title>KML Parser</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="./jquery.min.js"></script>
+    <script src="./d3.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <body>
+        <h2>KML Parser</h2>
+        <input type="file" id="fileInput" accept=".kml">
+        <button onclick="console.log('distance : '+polylineDistance(coordinates)+' km')">what is the distance</button>
+        <button onclick="listpointdistances(coordinates)">list point distances</button>
+        <button onclick="   console.log(adjustPoints(coordinates, 25, 5));"> add points </button>
+        <button onclick="  redocoord = []
+        for(jj=0;jj<totalDistance/10;jj++){
+    
+            redocoord.push(return_pointbymeter(jj*10))
+    
+            
+        }
+        console.log(redocoord)
+       coordinates = redocoord
+        "> search by meter </button>
+    
+    <button onclick="  draw_shit()"> draw shit </button>
+        <div id="diver"></div>
+        <input type="file" id="cvsInput" accept=".csv">
+
+     
+    </body>
     <script>
         // Function to parse KML file and extract coordinates
+        json_path = []
         function parseKML(file) {
             var reader = new FileReader();
             reader.onload = function (e) {
                 var xml = $.parseXML(e.target.result);
                 var placemarks = $(xml).find('Placemark');
                 placemarks.each(function() {
+                    fikoliste =[]
                     var coordinatesStr = $(this).find('coordinates').text().trim();
-                    var coordinatesArray = coordinatesStr.split(' ');
+                    coordinatesArray = coordinatesStr.split(' ');
                     for (var i = 0; i < coordinatesArray.length; i++) {
                         var coord = coordinatesArray[i].split(',');
-                        coordinates.push([parseFloat(coord[0]), parseFloat(coord[1])]); // Note: reversed lat/lon order
+                        fikoliste.push([parseFloat(coord[0]), parseFloat(coord[1])])
+                        json_path.push({coordinates:[parseFloat(coord[0]), parseFloat(coord[1])]}); // Note: reversed lat/lon order
                     }
                 });
-                console.log(coordinates);
+        console.log(fikoliste)
+        fikoliste= processPath(fikoliste, 10);
+        console.log(fikoliste)
             };
             reader.readAsText(file);
         }
+        function readCSV(file, callback) {
+            Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        complete: function(results) {
+             data = results.data;
+            const headers = results.meta.fields;
+            // Filter out empty rows
+            data = data.filter(row => {
+                return headers.some(header => row[header] !== null && row[header] !== undefined && row[header] !== "");
+            });
+
+            // Create an object with keys as headers and values as arrays of column content
+            const columns = headers.reduce((acc, header) => {
+                acc[header] = data.map(row => row[header]);
+                return acc;
+            }, {});
+
+            callback(columns);
+        }
+    });
+}
+function timeToSeconds(time) {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    return (hours * 3600) + (minutes * 60) + seconds;
+}
+
+// Example usage:
+document.getElementById('cvsInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    
+    readCSV(file, function(columns) {
+        console.log(columns);
+
+        laufer ={mara:[],half:[],tenkm:[],fivekm:[],twofivekm:[]}
+        for(i=0;i<columns.mara1.length;i++){
+if(columns.mara2[i] != undefined){
+            start = timeToSeconds(columns.mara2[i])-timeToSeconds(columns.mara1[i])
+            speed = 42195/ (timeToSeconds(columns.mara1[i]))
+            laufer.mara.push([start,speed])
+}
+        }
+
+        for(i=0;i<columns.half1.length;i++){
+if(columns.half2[i] != undefined){
+            start = timeToSeconds(columns.half2[i])-timeToSeconds(columns.half1[i])
+            speed = (42195/2) / (timeToSeconds(columns.half1[i]))
+            laufer.half.push([start,speed])
+}
+        }
+        for(i=0;i<columns.ten1.length;i++){
+if(columns.ten2[i] != undefined){
+            start = timeToSeconds(columns.ten2[i])-timeToSeconds(columns.ten1[i])
+            speed = 10000/ (timeToSeconds(columns.ten1[i]))
+            laufer.tenkm.push([start,speed])
+}
+        }
+        for(i=0;i<columns.five1.length;i++){
+if(columns.five2[i] != undefined){
+            start = timeToSeconds(columns.five2[i])-timeToSeconds(columns.five1[i])
+            speed = 5000/ (timeToSeconds(columns.five1[i]))
+            laufer.fivekm.push([start,speed])
+}
+        }
+
+        for(i=0;i<columns.two1.length;i++){
+if(columns.two2[i] != undefined){
+            start = timeToSeconds(columns.two2[i])-timeToSeconds(columns.two1[i])
+            speed = 2500/ (timeToSeconds(columns.two1[i]))
+            laufer.twofivekm.push([start,speed])
+}
+        }
+
+        lauferneu={
+            mara:countOccurrences(laufer.mara,2),
+            half:countOccurrences(laufer.half,2),
+            tenkm:countOccurrences(laufer.tenkm,2),
+            fivekm:countOccurrences(laufer.fivekm,2),
+            twofive:countOccurrences(laufer.twofivekm,2),
+
+        }
+      console.log(lauferneu)
+       //  laufercombine(laufer.mara)
+        // Do something with the columns data
+    });
+});
+function countOccurrences(arr, tolerancePercentage) {
+    const counts = {};
+
+    // Helper function to check if two numbers are within the tolerance percentage
+    function isWithinTolerance(val1, val2) {
+        const diff = Math.abs(val1 - val2);
+        const tolerance = Math.max(Math.abs(val1), Math.abs(val2)) * (tolerancePercentage / 100);
+        return diff <= tolerance;
+    }
+
+    // Helper function to find a matching key within the tolerance
+    function findMatchingKey(pair) {
+        for (const key in counts) {
+            const [a, b] = key.split(',').map(Number);
+            if (isWithinTolerance(pair[0], a) && isWithinTolerance(pair[1], b)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    // Iterate through each pair in the array
+    arr.forEach(pair => {
+        const matchingKey = findMatchingKey(pair);
+        if (matchingKey) {
+            counts[matchingKey]++;
+        } else {
+            const key = `${pair[0]},${pair[1]}`;
+            counts[key] = 1;
+        }
+    });
+
+    // Format the result as an array of arrays
+    const result = Object.keys(counts).map(key => {
+        const [a, b] = key.split(',').map(Number);
+        return [a, b, counts[key]];
+    });
+
+    return result;
+}
 
         // Function to handle file selection
         function handleFileSelect(event) {
@@ -32,13 +191,14 @@
             parseKML(file);
             setTimeout(function () {
                 console.log(coordinates);
-                distance = polylineDistance(coordinates);
+                distance = polylineDistance(json_path);
                 console.log("Total distance: ", distance, " meters");
 
              
 
             }, 200);
         }
+      
         function sphericalLawOfCosines(coord1, coord2) {
     const [lat1, lon1] = coord1;
     const [lat2, lon2] = coord2;
@@ -57,21 +217,59 @@
 }
  
         function polylineDistance(coordinates) {
-            let totalDistance = 0;
-            for (let i = 0; i < coordinates.length - 1; i++) {
-                totalDistance += sphericalLawOfCosines(coordinates[i], coordinates[i + 1]);
+             totalDistance = 0;
+             json_path[0].entf = 0
+                json_path[0].totentf =0
+            for (let i = 0; i < json_path.length - 1; i++) {
+                thisdistance =haversine(json_path[i].coordinates, json_path[i+1].coordinates)
+                if (thisdistance > 99){
+                totalDistance += thisdistance
+                json_path[i+1].entf = Math.round(thisdistance)
+                json_path[i+1].totentf = Math.round(totalDistance)}else{json_path[i+1].pop}
             }
+            console.log(json_path)
             return Math.round(totalDistance);
         }
 
-        function listpointdistances(coordinates){
-            for(i=0;i<coordinates.length-1;i++){
-                console.log(haversine(coordinates[i],coordinates[i+1]))
-            }
+        function interpolatePoints(coord1, coord2, maxDistance) {
+    const distance = haversine(coord1, coord2);
+    const numPoints = Math.ceil(distance / maxDistance);
+    
+    const latStep = (coord2[0] - coord1[0]) / numPoints;
+    const lonStep = (coord2[1] - coord1[1]) / numPoints;
+    
+    const points = [];
+    
+    for (let i = 1; i < numPoints; i++) {
+        points.push([
+            coord1[0] + i * latStep,
+            coord1[1] + i * lonStep
+        ]);
+    }
+    
+    return points;
+}
+
+// Main function to process the path
+function processPath(path, maxDistance) {
+    const resultPath = [];
+    
+    for (let i = 0; i < path.length - 1; i++) {
+        resultPath.push(path[i]);
+        const distance = haversine(path[i], path[i + 1]);
+        
+        if (distance > maxDistance) {
+            const intermediatePoints = interpolatePoints(path[i], path[i + 1], maxDistance);
+            resultPath.push(...intermediatePoints);
         }
-        // Function to interpolate points every 100 meters
-
-
+    }
+    
+    // Add the last point
+    resultPath.push(path[path.length - 1]);
+    
+    return resultPath;
+}
+    
         function haversine(coord1, coord2) {
     const [lat1, lon1] = coord1;
     const [lat2, lon2] = coord2;
@@ -90,66 +288,58 @@
     const R = 6371000; // Radius of the earth in m
     return R * c; 
 }
+function return_pointbymeter(meter){
+//console.log("Wir suchen die koordinate von dem Punkt der "+meter+" hinter dem start liegt")
 
-function interpolatePoints(start, end, interval) {
-    const points = [];
-    const lat1 = start[0];
-    const lon1 = start[1];
-    const lat2 = end[0];
-    const lon2 = end[1];
+for (i=0;i<listofdistances.length;i++){
+  // console.log(listofdistances[i] +" / " +meter)
+    if (meter < listofdistances[i]){
+            
+            
+            temp = Math.max((listofdistances[i]-meter),0)
+            console.log(temp/100)
+            neuer_punkt = [
+                //coordinates[i-1][0] + (  (coordinates[i-1][0]-coordinates[i][0]) *(temp/100) ),
+                //coordinates[i-1][1] - (  (coordinates[i-1][1]-coordinates[i][1])*(temp/100))
 
-    const d = haversine([lat1, lon1], [lat2, lon2]);
+                coordinates[i-1][0] + (  (coordinates[i-1][0]-coordinates[i][0])*(temp/10000)),
+                coordinates[i-1][1] - (  (coordinates[i-1][1]-coordinates[i][1])*(temp/10000))
+            ]
 
-    const steps = Math.floor(d / interval);
-    const latStep = (lat2 - lat1) / steps;
-    const lonStep = (lon2 - lon1) / steps;
-
-    for (let i = 0; i <= steps; i++) {
-        const lat = lat1 + i * latStep;
-        const lon = lon1 + i * lonStep;
-        points.push([lat, lon]);
-    }
-
-    return points;
-}
-
-function adjustPoints(coords, targetDistance, tolerance) {
-    const newCoords = [];
-    const maxDistance = targetDistance + tolerance;
-    const minDistance = targetDistance - tolerance;
-
-    newCoords.push(coords[0]); // Start with the first point
-
-    for (let i = 0; i < coords.length; i++) {
-        const start = newCoords[newCoords.length - 1];
-        const end = coords[i];
-        let distance = haversine(start, end);
-
-        if (distance > maxDistance) {
-            // Add intermediate points
-            const interpolatedPoints = interpolatePoints(start, end, targetDistance);
-            newCoords.push(...interpolatedPoints.slice(1)); // Avoid duplicating the start point
-        } else if (distance < minDistance) {
-            // If the next point is too close, skip adding it
-            continue;
-        } else {
-            // If the next point is within the acceptable range, add it
-            newCoords.push(end);
+            return(neuer_punkt)
+            break    
         }
+}
+
+}
+svg_toggle =false
+function draw_shit(){
+   // if(svg != undefined) {svg.remove()}
+
+    if (svg_toggle==false) {svg =d3.select('#diver').append('svg').attr("width",1000).attr("height",500).style("background-color","red")
+svg_toggle= true
+}
+    for (k=0;k<json_path.length-1;k++){
+tempx = 500+ ((json_path[k].coordinates[0]-json_path[0].coordinates[0])*10000)
+tempy = 200-((json_path[k].coordinates[1]-json_path[0].coordinates[1])*10000)
+tempx2 = 500+ ((json_path[k+1].coordinates[0]-json_path[0].coordinates[0])*10000)
+tempy2 = 200-((json_path[k+1].coordinates[1]-json_path[0].coordinates[1])*10000)
+
+svg.append('line').attr("y1",tempy).attr("y2",tempy2).attr("x1",tempx).attr("x2",tempx2).style("stroke","black")
+svg.append("circle").attr("r",1).attr('cx',tempx).attr('cy',tempy).style('fill',"green")
+//svg.append("text").attr("x",tempx).attr("y",tempy).text(k*100).style("font-weight",2)
     }
 
-    return newCoords;
+    for(i=0;i<fikoliste.length;i+=5){
+        tempx = 500+ (fikoliste[i][0]-fikoliste[0][0])*10000
+        tempy = 200-(fikoliste[i][1]-fikoliste[0][1])*10000
+        svg.append("circle").attr("r",1).attr('cx',tempx).attr('cy',tempy).style('fill',"blue")
+
+    }
+
 }
-    </script>
-</head>
-<body>
-    <h2>KML Parser</h2>
-    <input type="file" id="fileInput" accept=".kml">
-    <button onclick="console.log('distance : '+polylineDistance(coordinates)+' km')">what is the distance</button>
-    <button onclick="listpointdistances(coordinates)">list point distances</button>
-    <button onclick="   console.log(adjustPoints(coordinates, 25, 5));"> add points </button>
-    <script>
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
-    </script>
-</body>
+document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+
+</script>
+
 </html>
