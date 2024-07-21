@@ -127,6 +127,27 @@ if(columns.two2[i] != undefined){
             laufer.twofivekm.push([start,speed])
 }
         }
+        console.log(laufer)
+
+
+//    sontag vor der angst:
+
+wosind=[] // auf 500 gerundete weite der läufe bei vergangener zeit
+zeit = 1*60*60 // ein h in sec
+for(q=0;q<laufer.mara.length;q++ ){
+weite = (zeit-laufer.mara[q][0]) * laufer.mara[q][1] 
+
+if(weite > 0 && weite < 42195)
+    {wosind.push(Math.round(weite/500)*500)}
+}
+
+console.table(wieoft(wosind))
+
+
+
+//    sontag vor der angst/
+
+
 
         lauferneu={
             mara:countOccurrences(laufer.mara,2),
@@ -136,11 +157,35 @@ if(columns.two2[i] != undefined){
             twofive:countOccurrences(laufer.twofivekm,2),
 
         }
-      console.log(lauferneu)
+ 
        //  laufercombine(laufer.mara)
         // Do something with the columns data
     });
 });
+
+function wieoft(arr) {
+    // Create an object to count occurrences
+    const counts = {};
+    arr.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+    });
+
+    // Create a new array with the counts
+    const result = [];
+    for (const num in counts) {
+        if (counts.hasOwnProperty(num)) {
+            result.push([parseInt(num), counts[num]]);
+        }
+    }
+
+    return result;
+}
+
+
+
+
+
+
 function countOccurrences(arr, tolerancePercentage) {
     const counts = {};
 

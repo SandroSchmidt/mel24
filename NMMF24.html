@@ -9,24 +9,27 @@
 
 
 </head>
-<body><input type="range" id ="myRange" style="width: 80%" onchange="tim = this.value ; zeitgewahlt(this.value)"
-             value=60 min=360 max=900 step=0.25/>
-             <table>
-                <tr>
-                    <td>time: </td>
-                    <td><span id="uhr">00:00</span></td>
-                
-                    <td>guntime:</td>
-                    <td><span id="gunuhr">00:00</span></td>
-                </tr>
-            </table>
-    <div id="map" style="width: 100%; height: 800px;"></div>
- 
-    
+<style>
+    table.center {
+  margin-left: auto; 
+  margin-right: auto;
+}
+</style>
+<body>
     <button id="playbut" onclick="play = !play;
     if(!play){d3.select('#playbut').text('play')}else{d3.select('#playbut').text('stop')}
     ">play</button>
-       <button onclick="map.setPitch(45);map.setBearing(0);map.setZoom(14)
+       <button onclick="
+       
+       map.setPitch(45);map.setBearing(0);map.setZoom(12);map.setCenter([
+      144.94,
+      -37.8173614
+    ])
+
+
+
+
+
        d3.select('#gu1').property('value','45')
        d3.select('#gu2').property('value','0')
        d3.select('#gu3').property('value','15')
@@ -35,21 +38,35 @@
 
        play = false
            ">reset</button>
-     
+ speed:<input value="1" style="width:2%" id="spedset" type="number" min=1 max=5  onchange="autoplayspeed = 1/(6-this.value)"/>
+
+
+    <input type="range" id ="myRange" style="width: 80%" onchange="tim = this.value ; zeitgewahlt(this.value)"
+
+             value=60 min=360 max=900 step=0.25/>
             
-            <br>
-            pitch: <input id="gu1" type="number" value =45 step=1 min=15 max=90 oninput="map.setPitch(90-this.value)"/>
-            bearing: <input id="gu2" type="number" value=0 step=1 min=-90 max=90 oninput="map.setBearing(this.value)"/>
-            zoom: <input id="gu3" type="number" value =15 step=0.1 min=12 max=17 oninput="map.setZoom(this.value)"/>
-            <table>
+             <table class="center">
                 <tr>
+
+
                     <td>time: </td>
-                    <td><span id="puhr">00:00</span></td>
-                </tr>
-                <tr>
+                    <td><span id="uhr">00:00</span></td>
+                <td></td>
                     <td>guntime:</td>
-                    <td><span id="pgunuhr">00:00</span></td>
+                    <td><span id="gunuhr">00:00</span></td>
                 </tr>
+            </table>
+    <div id="map" style="width: 100%; height:95vh;"></div>
+ 
+    
+  
+     
+            <br>
+            pitch: <input id="gu1" type="number" style="width:4%" value =45 step=1 min=15 max=90 oninput="map.setPitch(90-this.value)"/>
+            bearing: <input id="gu2" type="number" style="width:4%" value=0 step=1 min=-90 max=90 oninput="map.setBearing(this.value)"/>
+            zoom: <input id="gu3" type="number" style="width:4%" value =15 step=0.1 min=12 max=17 oninput="map.setZoom(this.value)"/>
+            <table>
+           
                 <tr>
                     <td>marathon start:</td>
                     <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
@@ -66,10 +83,12 @@
                     <td> fivek start:</td>
                     <td><input id="fivekmtimset" type="time" value="12:01" onchange="delay.fivekm = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
+
                 <tr>
                     <td> twofivek start:</td>
                     <td><input id="twofivetimset" type="time" value="12:01" onchange="delay.twofive = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
+             
             </table>
  
 <br>  
@@ -87,25 +106,36 @@
 </style>
 <script>
     tim =360
-
+autoplayspeed = 0.25
 
     delay = {mara:60+360,half:120+360,tenkm:90+360,fivekm:315+360,twofivekm:345+360}
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
 d3.select('#halftimset').property("value",convertMinutesToTime(delay.half))
 d3.select('#tenkmtimset').property("value",convertMinutesToTime(delay.tenkm))
+d3.select("#myRange").property("value", tim);
 d3.select('#fivekmtimset').property("value",convertMinutesToTime(delay.fivekm))
 d3.select('#twofivetimset').property("value",convertMinutesToTime(delay.twofivekm))
-
+d3.select('#spedset').property("value",1)
     play= false
 
     setInterval(function(){
        if(play){
-        tim +=1
+        tim = parseFloat(tim)+autoplayspeed// 0.25
         if (tim ==1000){tim =0 ;play = false}
              zeitgewahlt(tim)
         
        } 
     },100)
+
+
+    mara.forEach((item) => {
+item[1] = item[1]+0.00003;
+item[0] = item[0]+0.00003}
+ )
+ half.forEach((item) => {
+item[1] = item[1]-0.00003;
+item[0] = item[0]-0.00003 }
+ )
 
     function convertTimeToMinutes(time) {
     // Split the input time into hours and minutes
@@ -153,7 +183,33 @@ function aggregateValues(arr) {
 
     return resultArray;
 }
+  function wieoft(arr,zeit) {
+                wosind=[] // auf 500 gerundete weite der läufe bei vergangener zeit
 
+for(q=0;q<arr.length;q++ ){
+weite = (zeit*60-delay.mara*60-arr[q][0]) * arr[q][1] 
+
+if(weite > 0 && weite < 42195)
+    {wosind.push(Math.round(weite/500)*500)}
+}
+
+
+    // Create an object to count occurrences
+    const counts = {};
+    wosind.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+    });
+
+    // Create a new array with the counts
+    const result = [];
+    for (const num in counts) {
+        if (counts.hasOwnProperty(num)) {
+            result.push([parseInt(num), counts[num]]);
+        }
+    }
+
+    return result;
+}
 function return_woist(){
 
 }
@@ -164,16 +220,37 @@ min = Math.min(min,Math.round(42195/(item[1]*60)))
 })
 
 wosind ={mara:[],half:[],tenkm:[],fivekm:[],twofivekm:[]}
-    function zeitgewahlt(tim)
 
-
+function zeitgewahlt(timr)
     {
-    // > Tim ist in minuten
-        
+    tim=timr        
         d3.select("#myRange").property("value", tim);
         d3.select('#uhr').text(convertMinutesToTime(Math.round(tim)))
         d3.select('#gunuhr').text(convertMinutesToTime(Math.max(0,Math.round(tim-delay.mara))))
  
+
+    
+wieoft_arr =wieoft(full_laufer.mara, tim)
+//console.log(wieoft_arr)
+
+let peakmara = wieoft_arr.reduce((maxSubArray, currentSubArray) => {
+  return currentSubArray[1] > maxSubArray[1] ? currentSubArray : maxSubArray;
+}, [-Infinity, -Infinity]); // Start with [-Infinity, -Infinity] to ensure any sub-array will be higher
+
+// Step 3: Extract the first value and the highest second value
+
+for(i=0;i<wieoft.length;i++){
+    //xxx
+}
+console.table(peakmara)
+
+
+
+
+
+
+
+
 
         /*
 marawurst =[]
@@ -265,7 +342,7 @@ mara_fahnen={
     erster_elit:Math.max(0,tim-delay.mara) * 60 * 5.25,
     erster_feld:Math.max(0,tim-delay.mara) * 60 * 4.40,
     letzter_elit:0,
-    letzter_feld:Math.max(0,tim-delay.mara) * 60 * 1.67,}
+    letzter_feld:Math.max(0,tim-delay.mara) * 60 * 1.75,}
 
 mara_fahnen={
     erster_elit:Math.round((mara_fahnen.erster_elit*mara.length)/42195),
@@ -273,11 +350,17 @@ mara_fahnen={
     letzter_elit:0,
     letzter_feld:Math.round((mara_fahnen.letzter_feld*mara.length)/42195)}
 
-    if(tim>delay.mara && tim < delay.mara+130){markers[10].setLngLat(mara[mara_fahnen.erster_elit])}else {markers[10].setLngLat([0,0])}
+    if(tim>delay.mara && tim < delay.mara+140){markers[10].setLngLat(mara[mara_fahnen.erster_elit])}else {markers[10].setLngLat([0,0])}
 map.getSource('maraeliteseg').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': mara.slice(mara_fahnen.erster_feld,mara_fahnen.erster_elit)   }})
 map.getSource('route_mara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
-  'coordinates': mara.slice(mara_fahnen.letzter_feld,mara_fahnen.erster_feld,)   }})
+  'coordinates': mara.slice(mara_fahnen.letzter_feld,mara_fahnen.erster_feld)   }})
+
+
+  map.getSource('peakmara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
+  'coordinates': mara.slice(Math.max(0,Math.round(((peakmara[0]*mara.length)/42195)-50)),Math.max(0,Math.round(((peakmara[0]*mara.length)/42195)+50))) }})
+
+console.log(Math.round(((peakmara[0]*mara.length)/42195)-3),Math.round(((peakmara[0]*mara.length)/42195)+3) )
 //---------------------------------------------------------------------------
   half_fahnen={
     erster_elit:Math.max(0,tim-delay.half) * 60 * 5.58,
@@ -309,7 +392,7 @@ tenkm_fahnen={
     letzter_elit:0,
     letzter_feld:Math.round((tenkm_fahnen.letzter_feld*tenkm.length)/10000)}
 
-    if(tim>delay.tenkm && tim < delay.tenkm+65){markers[12].setLngLat(tenkm[tenkm_fahnen.erster_elit])}else {markers[12].setLngLat([0,0])}
+    if(tim>delay.tenkm && tim < delay.tenkm+30){markers[12].setLngLat(tenkm[tenkm_fahnen.erster_elit])}else {markers[12].setLngLat([0,0])}
 map.getSource('tenkmeliteseg').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': tenkm.slice(tenkm_fahnen.erster_feld,tenkm_fahnen.erster_elit)   }})
 map.getSource('route_tenkm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
@@ -325,7 +408,7 @@ fivekm_fahnen={
     
     letzter_feld:Math.round((fivekm_fahnen.letzter_feld*fivekm.length)/5000)}
 
-    if(tim>delay.fivekm && tim < delay.fivekm+30){markers[13].setLngLat(fivekm[fivekm_fahnen.erster_elit])}else {markers[13].setLngLat([0,0])}
+    if(tim>delay.fivekm && tim < delay.fivekm+15){markers[13].setLngLat(fivekm[fivekm_fahnen.erster_elit])}else {markers[13].setLngLat([0,0])}
 map.getSource('route_fivekm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': fivekm.slice(fivekm_fahnen.letzter_feld,fivekm_fahnen.erster_elit,)   }})
   //---------------------------------------------------------------------------
@@ -338,10 +421,8 @@ twofivekm_fahnen={
     erster_elit:Math.round((twofivekm_fahnen.erster_elit*twofivekm.length)/2500),
     
     letzter_feld:Math.round((twofivekm_fahnen.letzter_feld*twofivekm.length)/2500)}
-    console.log(twofivekm_fahnen.erster_elit)
 
-    console.log(twofivekm[twofivekm_fahnen.erster_elit])
-    if(tim>delay.twofivekm && tim < delay.twofivekm+30){markers[14].setLngLat(twofivekm[twofivekm_fahnen.erster_elit])}else {markers[14].setLngLat([0,0])}
+    if(tim>delay.twofivekm && tim < delay.twofivekm+10){markers[14].setLngLat(twofivekm[twofivekm_fahnen.erster_elit])}else {markers[14].setLngLat([0,0])}
 map.getSource('route_twofivekm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': twofivekm.slice(twofivekm_fahnen.letzter_feld,twofivekm_fahnen.erster_elit,)   }})
   
@@ -501,6 +582,7 @@ if(tim>delay.half)
     {name:"maraeliteseg",coordinates:[0,0],color:"#091ceb"},
     {name:"halfeliteseg",coordinates:[0,0],color:"#091ceb"},
     {name:"tenkmeliteseg",coordinates:[0,0],color:"#091ceb"},    
+    {name:"peakmara",coordinates:[0,0],color:"yellow"}, 
 ]
 
 data=[]
@@ -598,7 +680,7 @@ var geojson = [];
     });
 
     map.addLayer({
-        'id': linienliste[i].name,
+        'id': linienliste[i].name + "l",
         'type': 'line',
         'source': linienliste[i].name,
         'layout': {
@@ -635,10 +717,13 @@ markers =[]
         markers.push(temp)
 });
 
-map.on('zoom', function() { d3.select('#gu3').property('value',Math.round(map.getZoom()*10)/10)})
+map.on('zoom', function() { d3.select('#gu3').property('value',Math.round(map.getZoom()*10)/10)
+if(map.getZoom() >14){linesize = 8}else{linesize=3}
+for(i=0;i<linienliste.length;i++){
+map.setPaintProperty(linienliste[i].name +"l", 'line-width', linesize);
+}
+})
 map.on('pitch', function() { d3.select('#gu1').property('value',90-Math.round(map.getPitch()))})
-//map.on('bearing', function() {console.log(map.getBearing()); d3.select('#gu2').property('value',map.getBearing())})
-
 map.on('move', function() { d3.select('#gu2').property('value',Math.round(map.getBearing()))})
   </script>
   </html>
