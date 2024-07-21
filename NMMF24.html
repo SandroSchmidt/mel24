@@ -17,7 +17,63 @@
 </style>
 <body>
     <button id="playbut" onclick="play = !play;
-    if(!play){d3.select('#playbut').text('play')}else{d3.select('#playbut').text('stop')}
+    if(!play){d3.select('#playbut').text('play')
+
+/*
+if(map.getLayer('circle-layer'+k)){
+        for(q=0;q<42195;q+=500){
+ 
+
+ let k = q/500
+ map.addSource('circle'+k, {
+     
+     type: 'geojson',
+     data: {
+         type: 'FeatureCollection',
+         features: [{
+             type: 'Feature',
+             geometry: {
+                 type: 'Point',
+                 coordinates: mara[Math.round((q*mara.length)/42195)],
+             },
+             properties: {}
+         }]
+     }
+ });
+ 
+let zubrot= zubrote
+ map.addLayer({
+     id: 'circle-layer'+k,
+     type: 'circle',
+     source: 'circle'+k,
+     paint: {
+         'circle-radius': 3,
+         'circle-opacity': 0,
+         'circle-color': 'lime',
+         'circle-stroke-color': 'black',
+         'circle-stroke-width': 1
+     }
+ });}
+*/
+
+}else{d3.select('#playbut').text('stop')
+
+
+for(q=0;q<42195;q+=500){
+    let k = q/500
+    if(map.getLayer('circle-layer'+k)){
+   
+    map.removeLayer('circle-layer'+k);
+    map.removeSource('circle'+k);}
+}
+
+}
+
+
+
+    
+
+
     ">play</button>
        <button onclick="
        
@@ -41,7 +97,9 @@
  speed:<input value="1" style="width:2%" id="spedset" type="number" min=1 max=5  onchange="autoplayspeed = 1/(6-this.value)"/>
 
 
-    <input type="range" id ="myRange" style="width: 80%" onchange="tim = this.value ; zeitgewahlt(this.value)"
+    <input type="range" id ="myRange" style="width: 80%" onchange="
+    if(play == false)
+  {  tim = this.value ; zeitgewahlt(this.value)}"
 
              value=60 min=360 max=900 step=0.25/>
             
@@ -105,6 +163,12 @@
     }
 </style>
 <script>
+    peakmaraold=0
+    const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
+    uuuu =0
     tim =360
 autoplayspeed = 0.25
 
@@ -162,6 +226,30 @@ item[0] = item[0]-0.00003 }
     return `${formattedHours}:${formattedMinutes}`;
 }
 
+function fillSteps(inputArray) {
+    // Step 1: Initialize an empty object
+    const stepDict = {};
+
+    // Step 2: Populate the object with the given values
+    inputArray.forEach(([step, value]) => {
+        stepDict[step] = value;
+    });
+
+    // Step 3: Iterate through the steps from 0 to 42000
+    for (let step = 0; step <= 42000; step += 500) {
+        if (!stepDict.hasOwnProperty(step)) {
+            stepDict[step] = 0;
+        }
+    }
+
+    // Step 4: Convert the object back to a sorted array of arrays
+    const outputArray = Object.keys(stepDict).map(step => [parseInt(step), stepDict[step]]);
+
+    // Sort the array by the step values
+    outputArray.sort((a, b) => a[0] - b[0]);
+
+    return outputArray;
+}
 function aggregateValues(arr) {
     const resultMap = new Map();
 
@@ -207,8 +295,9 @@ if(weite > 0 && weite < 42195)
             result.push([parseInt(num), counts[num]]);
         }
     }
+    result2 = fillSteps(result);
 
-    return result;
+    return result2;
 }
 function return_woist(){
 
@@ -231,19 +320,103 @@ function zeitgewahlt(timr)
 
     
 wieoft_arr =wieoft(full_laufer.mara, tim)
-//console.log(wieoft_arr)
+
 
 let peakmara = wieoft_arr.reduce((maxSubArray, currentSubArray) => {
   return currentSubArray[1] > maxSubArray[1] ? currentSubArray : maxSubArray;
 }, [-Infinity, -Infinity]); // Start with [-Infinity, -Infinity] to ensure any sub-array will be higher
-
+console.log(peakmara)
+peakmara = peakmara[0]
 // Step 3: Extract the first value and the highest second value
-
-for(i=0;i<wieoft.length;i++){
-    //xxx
+if(play){peakmara = Math.max(peakmara,peakmaraold)}
+peakmaraold = peakmara
+/*
+for(oooo=0;oooo<uuuu;oooo++){
+    
+    map.removeLayer('circle-layer'+oooo);
+    map.removeSource('circle'+oooo);
+    
 }
-console.table(peakmara)
+uuuu=0
+*/
+///xxxx
 
+
+
+if(!map.getLayer('circle-layer'+1)){
+        for(q=0;q<42195;q+=500){
+ 
+
+ let k = q/500
+ map.addSource('circle'+k, {
+     
+     type: 'geojson',
+     data: {
+         type: 'FeatureCollection',
+         features: [{
+             type: 'Feature',
+             geometry: {
+                 type: 'Point',
+                 coordinates: mara[Math.round((q*mara.length)/42195)],
+             },
+             properties: {}
+         }]
+     }
+ });
+ 
+let zubrot= zubrote
+ map.addLayer({
+     id: 'circle-layer'+k,
+     type: 'circle',
+     source: 'circle'+k,
+     paint: {
+         'circle-radius': 3,
+         'circle-opacity': 0,
+         'circle-color': 'lime',
+         'circle-stroke-color': 'black',
+         'circle-stroke-width': 0
+     }
+ },"peakmaral");}}
+
+
+for(q=0;q<42195;q+=500){
+if(play == false){
+    let k = q/500
+
+ let weite = wieoft_arr[k][0] 
+  let runners = wieoft_arr[k][1]
+   
+
+
+
+    map.on('mouseenter', 'circle-layer'+k, () => {
+    map.getCanvas().style.cursor = 'pointer';
+    
+    popup.setLngLat(mara[Math.round((weite*mara.length)/42195)]).setHTML("marathon <br> at: "+ convertMinutesToTime(tim)+ " h <br>"+ Math.round(weite/100)/10 +" km <br>"+ runners/5 +" runners/100m" ).addTo(map);
+    
+    //map.setPaintProperty('circle-layer'+k, 'circle-color', '#3bb2d0');
+    map.setPaintProperty('circle-layer'+k, 'circle-stroke-color', 'red');
+    map.setPaintProperty('circle-layer'+k, 'circle-stroke-width', 4);
+    map.setPaintProperty('circle-layer'+k, 'circle-radius', 5); 
+});
+
+if (runners/5 < 5){zubrote=0}else{zubrote=3}
+let zubrot= zubrote
+
+map.setPaintProperty('circle-layer'+k, 'circle-stroke-width', zubrot);
+
+map.on('mouseleave', 'circle-layer'+k, () => {
+    map.getCanvas().style.cursor = '';
+    popup.remove()
+   // map.setPaintProperty('circle-layer'+k, 'circle-color', '#007cbf');
+    map.setPaintProperty('circle-layer'+k, 'circle-stroke-color', "black");
+    map.setPaintProperty('circle-layer'+k, 'circle-stroke-width', zubrot);
+    map.setPaintProperty('circle-layer'+k, 'circle-radius', 2);
+});
+}
+
+
+}
 
 
 
@@ -342,7 +515,8 @@ mara_fahnen={
     erster_elit:Math.max(0,tim-delay.mara) * 60 * 5.25,
     erster_feld:Math.max(0,tim-delay.mara) * 60 * 4.40,
     letzter_elit:0,
-    letzter_feld:Math.max(0,tim-delay.mara) * 60 * 1.75,}
+    letzter_feld:Math.max(0,tim-delay.mara-30) * 60 * 2,
+}
 
 mara_fahnen={
     erster_elit:Math.round((mara_fahnen.erster_elit*mara.length)/42195),
@@ -356,17 +530,21 @@ map.getSource('maraeliteseg').setData({    'type': 'Feature',    'properties': {
 map.getSource('route_mara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': mara.slice(mara_fahnen.letzter_feld,mara_fahnen.erster_feld)   }})
 
-
+if(peakmara != 0){
   map.getSource('peakmara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
-  'coordinates': mara.slice(Math.max(0,Math.round(((peakmara[0]*mara.length)/42195)-50)),Math.max(0,Math.round(((peakmara[0]*mara.length)/42195)+50))) }})
+  'coordinates': mara.slice(Math.max(0,Math.round(((peakmara*mara.length)/42195)-100)),Math.max(0,Math.round(((peakmara*mara.length)/42195)+100))) }})
+}else{
+    map.getSource('peakmara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
+  'coordinates': [0,0] }})
+}
 
-console.log(Math.round(((peakmara[0]*mara.length)/42195)-3),Math.round(((peakmara[0]*mara.length)/42195)+3) )
 //---------------------------------------------------------------------------
   half_fahnen={
     erster_elit:Math.max(0,tim-delay.half) * 60 * 5.58,
     erster_feld:Math.max(0,tim-delay.half) * 60 * 4.688,
     letzter_elit:0,
-    letzter_feld:Math.max(0,tim-delay.half) * 60 * 1.732,}
+    letzter_feld:Math.max(0,tim-delay.half) * 60 * 1.732,
+}
 
 half_fahnen={
     erster_elit:Math.round((half_fahnen.erster_elit*half.length)/21098),
@@ -392,7 +570,8 @@ tenkm_fahnen={
     letzter_elit:0,
     letzter_feld:Math.round((tenkm_fahnen.letzter_feld*tenkm.length)/10000)}
 
-    if(tim>delay.tenkm && tim < delay.tenkm+30){markers[12].setLngLat(tenkm[tenkm_fahnen.erster_elit])}else {markers[12].setLngLat([0,0])}
+    if(tim>delay.tenkm && tim < delay.tenkm+20){
+        markers[12].setLngLat(tenkm[tenkm_fahnen.erster_elit])}else {markers[12].setLngLat([0,0])}
 map.getSource('tenkmeliteseg').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': tenkm.slice(tenkm_fahnen.erster_feld,tenkm_fahnen.erster_elit)   }})
 map.getSource('route_tenkm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
@@ -509,6 +688,10 @@ if(tim>delay.half)
   
     // Add 3D buildings layer
     map.on('load', function () {
+
+
+
+
       map.addLayer({
         'id': '3d-buildings',
         'source': 'composite',
@@ -694,6 +877,41 @@ var geojson = [];
     });}
 
     
+    for(q=0;q<42195;q+=500){
+ 
+
+ let k = q/500
+ map.addSource('circle'+k, {
+     
+     type: 'geojson',
+     data: {
+         type: 'FeatureCollection',
+         features: [{
+             type: 'Feature',
+             geometry: {
+                 type: 'Point',
+                 coordinates: mara[Math.round((q*mara.length)/42195)],
+             },
+             properties: {}
+         }]
+     }
+ });
+
+ map.addLayer({
+     id: 'circle-layer'+k,
+     type: 'circle',
+     source: 'circle'+k,
+     paint: {
+         'circle-radius': 3,
+         'circle-opacity': 0,
+         'circle-color': 'lime',
+         'circle-stroke-color': 'black',
+         'circle-stroke-width': 2
+     }
+ },"peakmaral");
+
+
+}
   })
 
   map.addControl(new mapboxgl.NavigationControl({ showCompass: true,showZoom: true,showPitch: true }));
@@ -725,5 +943,8 @@ map.setPaintProperty(linienliste[i].name +"l", 'line-width', linesize);
 })
 map.on('pitch', function() { d3.select('#gu1').property('value',90-Math.round(map.getPitch()))})
 map.on('move', function() { d3.select('#gu2').property('value',Math.round(map.getBearing()))})
+
+
+
   </script>
   </html>
