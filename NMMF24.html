@@ -291,7 +291,7 @@ if(weite > 0 && weite < 42195)
     // Create a new array with the counts
     const result = [];
     for (const num in counts) {
-        if (counts.hasOwnProperty(num)) {
+        if (counts.hasOwnProperty(num) && counts[num] > 50) {
             result.push([parseInt(num), counts[num]]);
         }
     }
@@ -325,7 +325,7 @@ wieoft_arr =wieoft(full_laufer.mara, tim)
 let peakmara = wieoft_arr.reduce((maxSubArray, currentSubArray) => {
   return currentSubArray[1] > maxSubArray[1] ? currentSubArray : maxSubArray;
 }, [-Infinity, -Infinity]); // Start with [-Infinity, -Infinity] to ensure any sub-array will be higher
-console.log(peakmara)
+
 peakmara = peakmara[0]
 // Step 3: Extract the first value and the highest second value
 if(play){peakmara = Math.max(peakmara,peakmaraold)}
