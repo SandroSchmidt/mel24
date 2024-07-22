@@ -130,20 +130,20 @@ for(q=0;q<42195;q+=500){
                     <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
                 <tr>
-                    <td>halfmarathon start:</td>
+                    <td>half marathon start:</td>
                     <td><input id="halftimset" type="time" value="12:01" onchange="delay.half = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
                 <tr>
-                    <td>10k start:</td>
+                    <td>10 km start:</td>
                     <td> <input id="tenkmtimset" type="time" value="12:01" onchange="delay.tenkm = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
                 <tr>
-                    <td> fivek start:</td>
+                    <td> 5 km start:</td>
                     <td><input id="fivekmtimset" type="time" value="12:01" onchange="delay.fivekm = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
 
                 <tr>
-                    <td> twofivek start:</td>
+                    <td> 2.5 km start:</td>
                     <td><input id="twofivetimset" type="time" value="12:01" onchange="delay.twofive = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
                 </tr>
              
@@ -364,7 +364,7 @@ if(!map.getLayer('circle-layer'+1)){
      }
  });
  
-let zubrot= zubrote
+let zubrot= 3
  map.addLayer({
      id: 'circle-layer'+k,
      type: 'circle',
