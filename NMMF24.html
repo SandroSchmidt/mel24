@@ -18,43 +18,8 @@
 <body>
     <button id="playbut" onclick="play = !play;
     if(!play){d3.select('#playbut').text('play')
+     zeitgewahlt(Math.round(tim))
 
-/*
-if(map.getLayer('circle-layer'+k)){
-        for(q=0;q<42195;q+=500){
- 
-
- let k = q/500
- map.addSource('circle'+k, {
-     
-     type: 'geojson',
-     data: {
-         type: 'FeatureCollection',
-         features: [{
-             type: 'Feature',
-             geometry: {
-                 type: 'Point',
-                 coordinates: mara[Math.round((q*mara.length)/42195)],
-             },
-             properties: {}
-         }]
-     }
- });
- 
-let zubrot= zubrote
- map.addLayer({
-     id: 'circle-layer'+k,
-     type: 'circle',
-     source: 'circle'+k,
-     paint: {
-         'circle-radius': 3,
-         'circle-opacity': 0,
-         'circle-color': 'lime',
-         'circle-stroke-color': 'black',
-         'circle-stroke-width': 1
-     }
- });}
-*/
 
 }else{d3.select('#playbut').text('stop')
 
@@ -156,6 +121,28 @@ for(q=0;q<42195;q+=500){
     <input type="range" onchange="map.setPitch(this.value);" min=20 max=90 step=5/>
     <input type="range" onchange="map.setBearing(this.value);" min=-90 max=90 step=5/>
   -->
+
+
+
+  <!--
+  <button id="playbut" onclick="
+fivehpace = 42195/(5*60*60)
+
+  counter =0
+  abbruchzeit = 160*60 // in sekunden
+  for (i=0;i<full_laufer.mara.length;i++){
+    let run = full_laufer.mara[i]
+    
+    if ((abbruchzeit -run[0])*run[1]<22000){
+        counter++
+        //if(run[1]<fivehpace){console.log('schnelle')}
+        if(run[1]*((5*60*60)-run[0])>42195){console.log('schneller')}
+    }
+
+  }
+alert('so viele läufer sind um ' + convertMinutesToTime((abbruchzeit/60)+delay.mara) +' noch vor 22 km '+counter)
+  ">calc</button>
+-->
 </body>
 <style>
     body {
@@ -308,7 +295,7 @@ if(weite > 0 && weite < 42195)
     // Create a new array with the counts
     const result = [];
     for (const num in counts) {
-        if (counts.hasOwnProperty(num) && counts[num] > 50) {
+        if (counts.hasOwnProperty(num) && counts[num] > 10) {
             result.push([parseInt(num), counts[num]]);
         }
     }
