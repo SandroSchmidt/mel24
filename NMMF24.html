@@ -127,24 +127,24 @@ for(q=0;q<42195;q+=500){
            
                 <tr>
                     <td>marathon start:</td>
-                    <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
+                    <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value); zeitgewahlt(tim);   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
                 <tr>
                     <td>half marathon start:</td>
-                    <td><input id="halftimset" type="time" value="12:01" onchange="delay.half = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
+                    <td><input id="halftimset" type="time" value="12:01" onchange="delay.half = convertTimeToMinutes(this.value); zeitgewahlt(tim);   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
                 <tr>
                     <td>10 km start:</td>
-                    <td> <input id="tenkmtimset" type="time" value="12:01" onchange="delay.tenkm = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
+                    <td> <input id="tenkmtimset" type="time" value="12:01" onchange="delay.tenkm = convertTimeToMinutes(this.value); zeitgewahlt(tim);   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
                 <tr>
                     <td> 5 km start:</td>
-                    <td><input id="fivekmtimset" type="time" value="12:01" onchange="delay.fivekm = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
+                    <td><input id="fivekmtimset" type="time" value="12:01" onchange="delay.fivekm = convertTimeToMinutes(this.value); zeitgewahlt(tim);   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
 
                 <tr>
                     <td> 2.5 km start:</td>
-                    <td><input id="twofivetimset" type="time" value="12:01" onchange="delay.twofive = convertTimeToMinutes(this.value); zeitgewahlt(tim);"/></td>
+                    <td><input id="twofivetimset" type="time" value="12:01" onchange="delay.twofive = convertTimeToMinutes(this.value); zeitgewahlt(tim);   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
              
             </table>
@@ -172,13 +172,30 @@ for(q=0;q<42195;q+=500){
     tim =360
 autoplayspeed = 0.25
 
-    delay = {mara:60+360,half:120+360,tenkm:90+360,fivekm:315+360,twofivekm:345+360}
+key= "delay"
+const value = localStorage.getItem(key);
+
+// Check if the value exists
+
+if (value !== null) {
+  delay = JSON.parse(value)
+  console.log(JSON.parse(value));
+  console.log("gelesen von locals")
+} else {
+    delay = {mara:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
+    localStorage.setItem(key, JSON.stringify(delay));
+    console.log('did not exist in local storage.')
+
+}
+
+
+
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
 d3.select('#halftimset').property("value",convertMinutesToTime(delay.half))
 d3.select('#tenkmtimset').property("value",convertMinutesToTime(delay.tenkm))
 d3.select("#myRange").property("value", tim);
 d3.select('#fivekmtimset').property("value",convertMinutesToTime(delay.fivekm))
-d3.select('#twofivetimset').property("value",convertMinutesToTime(delay.twofivekm))
+d3.select('#twofivekmtimset').property("value",convertMinutesToTime(delay.twofivekm))
 d3.select('#spedset').property("value",1)
     play= false
 
@@ -392,8 +409,9 @@ if(play == false){
     map.on('mouseenter', 'circle-layer'+k, () => {
     map.getCanvas().style.cursor = 'pointer';
     
+    if(runners >0){
     popup.setLngLat(mara[Math.round((weite*mara.length)/42195)]).setHTML("marathon <br> at: "+ convertMinutesToTime(tim)+ " h <br>"+ Math.round(weite/100)/10 +" km <br>"+ runners/5 +" runners/100m" ).addTo(map);
-    
+    }
     //map.setPaintProperty('circle-layer'+k, 'circle-color', '#3bb2d0');
     map.setPaintProperty('circle-layer'+k, 'circle-stroke-color', 'red');
     map.setPaintProperty('circle-layer'+k, 'circle-stroke-width', 4);
