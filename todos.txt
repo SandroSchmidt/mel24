@@ -27,6 +27,8 @@ half black
 5 pink
 3 blue
 
+- bei allen läufen die letzt 65 läufer gelöscht
+
 elite immer #091ceb
 Marathon #25c448 Start 07:00, Ziel Elite Ziel 09:14, Erster Open Field 09:40, Ziel Letzter Open Field 13:46
 10k #eb09d0 07:30, 07:59, 08:05, 09:22

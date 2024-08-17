@@ -124,25 +124,33 @@ for(q=0;q<42195;q+=500){
 
 
 
-  <!--
   <button id="playbut" onclick="
 fivehpace = 42195/(5*60*60)
 
   counter =0
+  mara_umgeleitet =[]
+  mara_normal =[]
   abbruchzeit = 160*60 // in sekunden
   for (i=0;i<full_laufer.mara.length;i++){
     let run = full_laufer.mara[i]
     
     if ((abbruchzeit -run[0])*run[1]<22000){
         counter++
+       mara_normal.push(mara[i])
+
+
         //if(run[1]<fivehpace){console.log('schnelle')}
-        if(run[1]*((5*60*60)-run[0])>42195){console.log('schneller')}
-    }
+        //if(run[1]*((5*60*60)-run[0])>42195){console.log('schneller')}
+    }else{  mara_umgeleitet.push(mara[i])}
 
   }
-alert('so viele läufer sind um ' + convertMinutesToTime((abbruchzeit/60)+delay.mara) +' noch vor 22 km '+counter)
+//alert('so viele läufer sind um ' + convertMinutesToTime((abbruchzeit/60)+delay.mara) +' noch vor 22 km '+counter)
+full_laufer.mara=mara_normal
+
+
+
   ">calc</button>
--->
+
 </body>
 <style>
     body {
@@ -597,6 +605,22 @@ map.getSource('route_fivekm').setData({    'type': 'Feature',    'properties': {
   'coordinates': fivekm.slice(fivekm_fahnen.letzter_feld,fivekm_fahnen.erster_elit,)   }})
   //---------------------------------------------------------------------------
   twofivekm_fahnen={
+    erster_elit:Math.max(0,tim-delay.twofivekm) * 60 * 4.63,
+   
+    letzter_feld:Math.max(0,tim-delay.twofivekm) * 60 * 0.78,}
+
+twofivekm_fahnen={
+    erster_elit:Math.round((twofivekm_fahnen.erster_elit*twofivekm.length)/2500),
+    
+    letzter_feld:Math.round((twofivekm_fahnen.letzter_feld*twofivekm.length)/2500)}
+
+    if(tim>delay.twofivekm && tim < delay.twofivekm+10){markers[14].setLngLat(twofivekm[twofivekm_fahnen.erster_elit])}else {markers[14].setLngLat([0,0])}
+map.getSource('route_twofivekm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
+  'coordinates': twofivekm.slice(twofivekm_fahnen.letzter_feld,twofivekm_fahnen.erster_elit,)   }})
+  
+
+    //---------------------------------------------------------------------------
+    maraumgeleiet_fahnen={
     erster_elit:Math.max(0,tim-delay.twofivekm) * 60 * 4.63,
    
     letzter_feld:Math.max(0,tim-delay.twofivekm) * 60 * 0.78,}
