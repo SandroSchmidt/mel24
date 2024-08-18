@@ -6,7 +6,7 @@
 
 <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
-<title>Melburne</title>
+<title>NMMF24</title>
 
 </head>
 <style>
@@ -118,7 +118,51 @@
 
 
 
+<button onclick="
+!coltoggle
+if (coltoggle){
+    colorScale ={ mara: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'red','black']),
+            
+            maraslow: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'lime','black']),
+            
+            half: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'blue','black']),tenkm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'green','black']),fivekm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'pink','black']),twofivekm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ '#09ebdc','black'])
 
+
+  }}else{
+    colorScale ={    mara: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'red','red']),
+            
+            maraslow: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'lime','lime']),
+            
+            half: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'blue','blue']),tenkm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'green','green']),fivekm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ 'pink','pink']),twofivekm: d3.scaleLinear()
+            .domain([0, 500])  // Input domain
+            .range([ '#09ebdc','#09ebdc'])
+    }
+}
+
+
+">color scheme</button>
 
 </body>
 <style>
@@ -127,6 +171,7 @@
     }
 </style>
 <script>
+    coltoggle=false
     autoplayspeed = 0.5
         coordinates.mara.forEach((item) => {
 item[1] = item[1]+0.00005;
@@ -149,17 +194,17 @@ item[0] = item[0]-0.00005 }
  )
 
   colorScale ={ mara: d3.scaleLinear()
-            .domain([0, 200])  // Input domain
+            .domain([0, 500])  // Input domain
             .range([ "red","black"]),
             
             maraslow: d3.scaleLinear()
-            .domain([0, 200])  // Input domain
+            .domain([0, 500])  // Input domain
             .range([ "lime","black"]),
             
             half: d3.scaleLinear()
-            .domain([0, 200])  // Input domain
+            .domain([0, 500])  // Input domain
             .range([ "blue","black"]),tenkm: d3.scaleLinear()
-            .domain([0, 200])  // Input domain
+            .domain([0, 500])  // Input domain
             .range([ "green","black"]),fivekm: d3.scaleLinear()
             .domain([0, 500])  // Input domain
             .range([ "pink","black"]),twofivekm: d3.scaleLinear()
@@ -169,10 +214,10 @@ item[0] = item[0]-0.00005 }
 
   }
  const mengeScale = d3.scaleLinear()
-            .domain([0, 200])  // Input domain
+            .domain([0, 500])  // Input domain
             .range([ 3,10]); 
 
-            delay={mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
+           
 racenames={mara:"marathon",maraslow:"marathon diverted",half:"halfmarathon",tenkm:"10km run",fivekm:"5km run",twofivekm:"2.5km run"}
            cutoff = {mara:8*60+360+60,maraslow:8*60+360+60,half:5*60+360+120,tenkm:5*60+360+90,fivekm:3*60+330+360,twofivekm:3*60+360+360}
 
@@ -182,7 +227,7 @@ key= "delay"
 const value = localStorage.getItem(key);
 
 // Check if the value exists
-
+delay={mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
 if (value !== null) {
   delay = JSON.parse(value)
   console.log(JSON.parse(value));
@@ -194,6 +239,7 @@ if (value !== null) {
 
 }
 
+delay.maraslow=60+360
 
 
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
@@ -246,30 +292,36 @@ play = false
         
         if (timr<160+delay.mara){
                         /*
-                        colorScale.maraslow =d3.scaleLinear().domain([0, 200]) .range([ "red","black"])}
-                                        else{                colorScale.maraslow= d3.scaleLinear().domain([0, 200]) .range([ "lime","black"])
+                        colorScale.maraslow =d3.scaleLinear().domain([0, 500]) .range([ "red","black"])}
+                                        else{                colorScale.maraslow= d3.scaleLinear().domain([0, 500]) .range([ "lime","black"])
 */
                                          }
 
 
                                     for (const key in coordinates) {
+                                        
                                         let kk = Math.max(0,timr-delay[key]) 
                                         kkk =kk
+                                        if(key== "maraslow"){console.log("e")}
                                         if (kk<woist[key].length){
                                     for(i=0;i<coordinates[key].length-1;i++){
-
-                                      
+                                       
                              
-                                        if (timr<160+delay.mara&& key=="mara"){menge = woist.marafull[kk][i]}else{menge = woist[key][kk][i]}
+                                        if (timr<160+delay.mara&& key=="mara"){
+                                            menge = woist.marafull[kk][i]}else
+                                            {menge = woist[key][kk][i]}
                             
-                         
+                                        strokec=0
                             stroke = Math.min(10,mengeScale(menge))
                             rad = Math.min(10, mengeScale(menge))
                             if (menge < 3){stroke=0;rad = 0;strokec=0}
                             col = colorScale[key](menge)
-                            strokec=0
+                            
                             if(timr<delay[key] || timr>cutoff[key]){stroke=0;strokec=0,rad=0}
-                            if(timr<160+delay.mara&& key=="maraslow"){stroke=0;strokec=0,rad=0}
+                            if(timr<160+delay.mara&& key=="maraslow"){                          
+                                stroke=0;strokec=0,rad=0}
+                            
+                            
                             pointjsons[key].features[i+1].properties.radius = rad
                             pointjsons[key].features[i+1].properties.stroke = strokec
                             pointjsons[key].features[i+1].properties.fill = col
