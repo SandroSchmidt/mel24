@@ -151550,6 +151550,11 @@ d3.select('#p_lastin').text("last finisher: (brutto) " + convertMinutesToTime(la
 
 //
 
+
+
+
+
+
 const margin = {top: 10, right: 30, bottom: 30, left: 60},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
@@ -151567,16 +151572,23 @@ for(i=0;i<runners.mara.length;i++){
 }
 
 
-
         reduzierte_daten={}
         gerundete_daten={}
+
         for (const key in runners) {
               let kox = key
                        gerundete_daten[key] = runners[key].map(arr => [Math.round(arr[0]/10)*10, Math.round(arr[1]*100)/100]);
-            reduzierte_daten[key] =countOccurrences(gerundete_daten[key],0)
+             reduzierte_daten[key] =countOccurrences(gerundete_daten[key],0)
         }
-  
-            
+  console.log(gerundete_daten)
+// ende der vorberechnung
+
+
+
+
+
+
+
             
     draw_delayoverspeed(runners.mara)
     draw_speedhisto(runners.mara)
@@ -151722,9 +151734,9 @@ data2 = gerundete_daten[ausgewaehltes_rennen].map(arr => ((races[ausgewaehltes_r
          }
     }
     temp = temp.map(arr => ((races[ausgewaehltes_rennen].distance/arr[1])+arr[0])/3600)
- console.log(temp)
+
 data3 =  histogram(temp);
-console.log(data3)
+
     // Append the line to the SVG
     svg.append("path")
         .datum(data3)

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-<script src='./data.js'></script>
+<script src='./datav2.js'></script>
 
 <script src='./d3.min.js'></script>
 
@@ -64,7 +64,14 @@ for(q=0;q<42195;q+=500){
 
     <input type="range" id ="myRange" style="width: 80%" onchange="
     if(play == false)
-  {  tim = this.value ; zeitgewahlt(this.value)}"
+  {  key='mara'
+    //tim = this.value ; zeitgewahlt(this.value)
+    for (i=1;i<coordinates[key].length;i++){
+        console.log('--'+i)
+        map.setPaintProperty(key+'_circle-layer_'+i, 'circle-radius', woist[key][this.value][i]/10); 
+
+    }
+  }"
 
              value=60 min=360 max=900 step=0.25/>
             
@@ -124,32 +131,6 @@ for(q=0;q<42195;q+=500){
 
 
 
-  <button id="playbut" onclick="
-fivehpace = 42195/(5*60*60)
-
-  counter =0
-  mara_umgeleitet =[]
-  mara_normal =[]
-  abbruchzeit = 160*60 // in sekunden
-  for (i=0;i<full_laufer.mara.length;i++){
-    let run = full_laufer.mara[i]
-    
-    if ((abbruchzeit -run[0])*run[1]<22000){
-        counter++
-       mara_normal.push(mara[i])
-
-
-        //if(run[1]<fivehpace){console.log('schnelle')}
-        //if(run[1]*((5*60*60)-run[0])>42195){console.log('schneller')}
-    }else{  mara_umgeleitet.push(mara[i])}
-
-  }
-//alert('so viele läufer sind um ' + convertMinutesToTime((abbruchzeit/60)+delay.mara) +' noch vor 22 km '+counter)
-full_laufer.mara=mara_normal
-
-
-
-  ">calc</button>
 
 </body>
 <style>
@@ -158,6 +139,7 @@ full_laufer.mara=mara_normal
     }
 </style>
 <script>
+
     peakmaraold=0
     const popup = new mapboxgl.Popup({
             closeButton: false,
@@ -165,25 +147,24 @@ full_laufer.mara=mara_normal
         });
     uuuu =0
     tim =360
-autoplayspeed = 0.25
+    autoplayspeed = 0.25
+    wosind ={mara:[],half:[],tenkm:[],fivekm:[],twofivekm:[]}
 
-key= "delay"
-const value = localStorage.getItem(key);
+// hier werden die map ausrichtungsdaten aus dem localS geholt 
+         key= "delay"
+        const value = localStorage.getItem(key);
+        // Check if the value exists
+        if (value !== null) {
+            delay = JSON.parse(value)
+            console.log(JSON.parse(value));
+            console.log("gelesen von locals")
+            } else {
+                delay = {mara:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
+                localStorage.setItem(key, JSON.stringify(delay));
+                console.log('did not exist in local storage.')
+            }
 
-// Check if the value exists
-
-if (value !== null) {
-  delay = JSON.parse(value)
-  console.log(JSON.parse(value));
-  console.log("gelesen von locals")
-} else {
-    delay = {mara:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
-    localStorage.setItem(key, JSON.stringify(delay));
-    console.log('did not exist in local storage.')
-
-}
-
-
+// Setups -Start
 
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
 d3.select('#halftimset').property("value",convertMinutesToTime(delay.half))
@@ -204,15 +185,50 @@ d3.select('#spedset').property("value",1)
     },100)
 
 
-    mara.forEach((item) => {
+ // hier werden die koordinaten von der marastrecke leicht nach rechts veschoben, sodass sie neben den anderen strecken erkenn bar sind
+    coordinates.mara.forEach((item) => {
 item[1] = item[1]+0.00003;
 item[0] = item[0]+0.00003}
  )
- half.forEach((item) => {
+
+ // das gleichge für half
+ /*
+ coordinates.half.forEach((item) => {
 item[1] = item[1]-0.00003;
 item[0] = item[0]-0.00003 }
  )
+*/
+marajson = generateColoredGeoJSON(coordinates.mara) 
 
+
+
+ initialise_map()
+ function generateColoredGeoJSON(coordinates) {
+    const colors = ['#ff0000', '#00ff00', '#ffff00', '#0000ff']; // Red, Green, Yellow, Blue
+    let features = [];
+
+    for (let i = 0; i < coordinates.length - 1; i++) {
+        let colorIndex = i % colors.length; // Cycle through colors
+        features.push({
+            "type": "Feature",
+            "properties": {
+                "stroke": colors[colorIndex]
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    coordinates[i],
+                    coordinates[i + 1]
+                ]
+            }
+        });
+    }
+
+    return {
+        "type": "FeatureCollection",
+        "features": features
+    };
+}
     function convertTimeToMinutes(time) {
     // Split the input time into hours and minutes
     const [hours, minutes] = time.split(':').map(Number);
@@ -222,7 +238,6 @@ item[0] = item[0]-0.00003 }
     
     return totalMinutes;
 }
-
     function convertMinutesToTime(temp) {
     // Base time of 6:00 AM
     
@@ -237,8 +252,7 @@ item[0] = item[0]-0.00003 }
     
     return `${formattedHours}:${formattedMinutes}`;
 }
-
-function fillSteps(inputArray) {
+    function fillSteps(inputArray) {
     // Step 1: Initialize an empty object
     const stepDict = {};
 
@@ -262,7 +276,7 @@ function fillSteps(inputArray) {
 
     return outputArray;
 }
-function aggregateValues(arr) {
+    function aggregateValues(arr) {
     const resultMap = new Map();
 
     // Iterate over each pair [a, b]
@@ -283,7 +297,7 @@ function aggregateValues(arr) {
 
     return resultArray;
 }
-  function wieoft(arr,zeit) {
+    function wieoft(arr,zeit) {
                 wosind=[] // auf 500 gerundete weite der läufe bei vergangener zeit
 
 for(q=0;q<arr.length;q++ ){
@@ -311,18 +325,10 @@ if(weite > 0 && weite < 42195)
 
     return result2;
 }
-function return_woist(){
+    function return_woist(){
 
 }
-min = 99999999999
-laufer.half.forEach(function (item, index) {
-
-min = Math.min(min,Math.round(42195/(item[1]*60)))
-})
-
-wosind ={mara:[],half:[],tenkm:[],fivekm:[],twofivekm:[]}
-
-function zeitgewahlt(timr)
+    function zeitgewahlt(timr)
     {
     tim=timr        
         d3.select("#myRange").property("value", tim);
@@ -369,7 +375,7 @@ if(!map.getLayer('circle-layer'+1)){
              type: 'Feature',
              geometry: {
                  type: 'Point',
-                 coordinates: mara[Math.round((q*mara.length)/42195)],
+                 coordinates: coordinates.mara[Math.round((q*coordinates.mara.length)/42195)],
              },
              properties: {}
          }]
@@ -405,7 +411,7 @@ if(play == false){
     map.getCanvas().style.cursor = 'pointer';
     
     if(runners >0){
-    popup.setLngLat(mara[Math.round((weite*mara.length)/42195)]).setHTML("marathon <br> at: "+ convertMinutesToTime(tim)+ " h <br>"+ Math.round(weite/100)/10 +" km <br>"+ runners/5 +" runners/100m" ).addTo(map);
+    popup.setLngLat(coordinates.mara[Math.round((weite*coordinates.mara.length)/42195)]).setHTML("marathon <br> at: "+ convertMinutesToTime(tim)+ " h <br>"+ Math.round(weite/100)/10 +" km <br>"+ runners/5 +" runners/100m" ).addTo(map);
     }
     //map.setPaintProperty('circle-layer'+k, 'circle-color', '#3bb2d0');
     map.setPaintProperty('circle-layer'+k, 'circle-stroke-color', 'red');
@@ -504,8 +510,8 @@ for (var i = 0; i < data.length - 1; i++) {
         "geometry": {
             "type": "LineString",
             "coordinates": [
-            mara[data[i][0]],
-            mara[data[i][0]+1],
+            coordinates.mara[data[i][0]],
+            coordinates.mara[data[i][0]+1],
             data[i][1]*100
             ]
         },
@@ -537,20 +543,20 @@ mara_fahnen={
     letzter_elit:0,
     letzter_feld:Math.round((mara_fahnen.letzter_feld*mara.length)/42195)}
 
-    if(tim>delay.mara && tim < delay.mara+140){markers[10].setLngLat(mara[mara_fahnen.erster_elit])}else {markers[10].setLngLat([0,0])}
+    if(tim>delay.mara && tim < delay.mara+140){markers[10].setLngLat(coordinates.mara[mara_fahnen.erster_elit])}else {markers[10].setLngLat([0,0])}
 map.getSource('maraeliteseg').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
-  'coordinates': mara.slice(mara_fahnen.erster_feld,mara_fahnen.erster_elit)   }})
+  'coordinates': coordinates.mara.slice(mara_fahnen.erster_feld,mara_fahnen.erster_elit)   }})
 map.getSource('route_mara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
-  'coordinates': mara.slice(mara_fahnen.letzter_feld,mara_fahnen.erster_feld)   }})
+  'coordinates': coordinates.mara.slice(mara_fahnen.letzter_feld,mara_fahnen.erster_feld)   }})
 
 if(peakmara != 0){
   map.getSource('peakmara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
-  'coordinates': mara.slice(Math.max(0,Math.round(((peakmara*mara.length)/42195)-100)),Math.max(0,Math.round(((peakmara*mara.length)/42195)+100))) }})
+  'coordinates': coordinates.mara.slice(Math.max(0,Math.round(((peakmara*coordinates.mara.length)/42195)-100)),Math.max(0,Math.round(((peakmara*coordinates.mara.length)/42195)+100))) }})
 }else{
     map.getSource('peakmara').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': [0,0] }})
 }
-
+/*
 //---------------------------------------------------------------------------
   half_fahnen={
     erster_elit:Math.max(0,tim-delay.half) * 60 * 5.58,
@@ -633,7 +639,7 @@ twofivekm_fahnen={
     if(tim>delay.twofivekm && tim < delay.twofivekm+10){markers[14].setLngLat(twofivekm[twofivekm_fahnen.erster_elit])}else {markers[14].setLngLat([0,0])}
 map.getSource('route_twofivekm').setData({    'type': 'Feature',    'properties': {},'geometry': {        'type': 'LineString',      
   'coordinates': twofivekm.slice(twofivekm_fahnen.letzter_feld,twofivekm_fahnen.erster_elit,)   }})
-  
+  */
   /*
         /*
         marawurst = mara.slice(Math.max(last,0),first)
@@ -700,7 +706,30 @@ if(tim>delay.half)
               
 
     }
-    mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJvc2NobWlkdCIsImEiOiJjbHg3bTMxYmwxMXZiMmtzY2tlN3RjNGY5In0.2whcv8hzfzdyukPAXWwSPw';
+    function initialise_map()  { 
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJvc2NobWlkdCIsImEiOiJjbHg3bTMxYmwxMXZiMmtzY2tlN3RjNGY5In0.2whcv8hzfzdyukPAXWwSPw';
+     map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11', // Map style to use
+      center:   [
+      144.94,
+      -37.8173614
+    ], // Starting position [lng, lat]
+    dragRotate: true,
+      zoom: 12 ,// Starting zoom level
+      pitch: 45, // tilt the map 45 degrees
+      bearing: 0 // rotate the map -17.6 degrees
+    });
+    linesize = 3
+  
+ 
+
+
+
+}
+
+    function initialise_map2()  { 
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJvc2NobWlkdCIsImEiOiJjbHg3bTMxYmwxMXZiMmtzY2tlN3RjNGY5In0.2whcv8hzfzdyukPAXWwSPw';
     var map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11', // Map style to use
@@ -717,7 +746,6 @@ if(tim>delay.half)
   
     // Add 3D buildings layer
     map.on('load', function () {
-
 
 
 
@@ -919,7 +947,7 @@ var geojson = [];
              type: 'Feature',
              geometry: {
                  type: 'Point',
-                 coordinates: mara[Math.round((q*mara.length)/42195)],
+                 coordinates: coordinates.mara[Math.round((q*coordinates.mara.length)/42195)],
              },
              properties: {}
          }]
@@ -947,7 +975,7 @@ var geojson = [];
 
 
 markers =[]
-  waypoints.forEach(waypoint => {
+ waypoints.forEach(waypoint => {
     const el = document.createElement('div');
     el.className = 'marker';
    el.style.backgroundImage = waypoint.icon;
@@ -972,7 +1000,7 @@ map.setPaintProperty(linienliste[i].name +"l", 'line-width', linesize);
 })
 map.on('pitch', function() { d3.select('#gu1').property('value',90-Math.round(map.getPitch()))})
 map.on('move', function() { d3.select('#gu2').property('value',Math.round(map.getBearing()))})
-
+}
 
 
   </script>
