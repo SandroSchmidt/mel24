@@ -127,7 +127,7 @@ if (coltoggle){
             
             maraslow: d3.scaleLinear()
             .domain([0, 500])  // Input domain
-            .range([ 'lime','black']),
+            .range([ 'yellow','black']),
             
             half: d3.scaleLinear()
             .domain([0, 500])  // Input domain
@@ -147,7 +147,7 @@ if (coltoggle){
             
             maraslow: d3.scaleLinear()
             .domain([0, 500])  // Input domain
-            .range([ 'lime','lime']),
+            .range([ 'yellow','yellow']),
             
             half: d3.scaleLinear()
             .domain([0, 500])  // Input domain
@@ -199,7 +199,7 @@ item[0] = item[0]-0.00005 }
             
             maraslow: d3.scaleLinear()
             .domain([0, 500])  // Input domain
-            .range([ "lime","black"]),
+            .range([ "yellow","black"]),
             
             half: d3.scaleLinear()
             .domain([0, 500])  // Input domain
@@ -293,7 +293,7 @@ play = false
         if (timr<160+delay.mara){
                         /*
                         colorScale.maraslow =d3.scaleLinear().domain([0, 500]) .range([ "red","black"])}
-                                        else{                colorScale.maraslow= d3.scaleLinear().domain([0, 500]) .range([ "lime","black"])
+                                        else{                colorScale.maraslow= d3.scaleLinear().domain([0, 500]) .range([ "yellow","black"])
 */
                                          }
 
@@ -440,6 +440,41 @@ function initialise_map()  {
     });
     linesize = 3
     map.on('load', function () {
+        map.addLayer({
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+          'fill-extrusion-color': '#aaa',
+          'fill-extrusion-height': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            15,
+            0,
+            15.05,
+            ['get', 'height']
+          ],
+          'fill-extrusion-base': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            15,
+            0,
+            15.05,
+            ['get', 'min_height']
+          ],
+          'fill-extrusion-opacity': 0.6
+        }
+      });
+
+
+
+
+
         var popup = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false
@@ -503,6 +538,8 @@ function initialise_map()  {
       popup.remove();
     });
   
+
+    
 
 }})
 
