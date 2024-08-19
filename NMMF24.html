@@ -329,7 +329,20 @@ play = false
                             linejsons[key].features[i].properties.stroke = col
                             linejsons[key].features[i].properties.width = stroke
                          //   pointjsons[key].features[i+1].properties.menge = menge2
-                            }  }
+                            }}else{ 
+
+                                for(i=0;i<coordinates[key].length-1;i++){
+                                       
+                             
+                                                         
+                           pointjsons[key].features[i+1].properties.radius = 0
+                           pointjsons[key].features[i+1].properties.stroke = 0
+                           pointjsons[key].features[i+1].properties.fill = "yellow"
+                           pointjsons[key].features[i+1].properties.text = "<b>"+racenames[key]+ "</b><br> "+ (i+1)/10+" km <br>" + convertMinutesToTime(timr) +" <br> "+ menge +" runners/100m "
+                           linejsons[key].features[i].properties.stroke = "yellow"
+                           linejsons[key].features[i].properties.width = 0}
+
+                            }  
                             map.getSource('line-segments'+key).setData(linejsons[key])
                             map.getSource('circles'+key).setData(pointjsons[key])
                             
