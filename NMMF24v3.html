@@ -93,7 +93,7 @@ realtime = false
            
                 <tr>
                     <td>marathon start:</td>
-                    <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value);delay.maraslow = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
+                    <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value);delay.maraslow = convertTimeToMinutes(this.value);delay.marafull = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
                 <tr>
                     <td>half marathon start:</td>
@@ -110,7 +110,7 @@ realtime = false
 
                 <tr>
                     <td> 2.5 km start:</td>
-                    <td><input id="twofivekmtimset" type="time" value="12:01" onchange="delay.twofive = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
+                    <td><input id="twofivekmtimset" type="time" value="12:01" onchange="delay.twofivekm = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
                 </tr>
              
             </table>
@@ -181,6 +181,7 @@ if (coltoggle){
 <script>
     realtime = false
     coltoggle=false
+    filast = {mara:{},maraslow:{},half:{},tenkm:{},fivekm:{},twofivekm:{},marafull:{}}
     autoplayspeed = 0.5
         coordinates.mara.forEach((item) => {
 item[1] = item[1]+0.00005;
@@ -216,7 +217,9 @@ item[0] = item[0]-0.00005 }
             .domain([0, 500])  // Input domain
             .range([ "green","black"]),fivekm: d3.scaleLinear()
             .domain([0, 500])  // Input domain
-            .range([ "pink","black"]),twofivekm: d3.scaleLinear()
+            .range([ "pink","black"]),
+            
+            twofivekm: d3.scaleLinear()
             .domain([0, 500])  // Input domain
             .range([ "#09ebdc","black"])
 
@@ -236,19 +239,19 @@ key= "delay"
 const value = localStorage.getItem(key);
 
 // Check if the value exists
-delay={mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
+delay={mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360,marafull:60+360}
 if (value !== null) {
+
   delay = JSON.parse(value)
   console.log(JSON.parse(value));
   console.log("gelesen von locals")
 } else {
-    delay = {mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360}
+    delay={mara:60+360,maraslow:60+360,half:120+360,tenkm:90+360,fivekm:330+360,twofivekm:360+360,marafull:60+360}
     localStorage.setItem(key, JSON.stringify(delay));
     console.log('did not exist in local storage.')
 
 }
 
-delay.maraslow=60+360
 
 
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
@@ -293,6 +296,10 @@ play = false
 
  function zeitgewahlt(timr)
     {
+        console.log("marad: " +delay.mara + " * " + delay.maraslow + " 22 " +delay.marafull)
+        for(f=10;f<21;f++){
+            markers[f].setLngLat([0,0])
+        }
     //tim=timr        
         d3.select("#myRange").property("value", timr);
         d3.select('#uhr').text(convertMinutesToTime(Math.round(timr)))
@@ -311,14 +318,15 @@ play = false
                                         
                                         let kk = Math.max(0,timr-delay[key]) 
                                         kkk =kk
-                                        if(key== "maraslow"){console.log("e")}
+                             
                                         if (kk<woist[key].length){
                                     for(i=0;i<coordinates[key].length-1;i++){
                                        
                              
-                                        if (timr<160+delay.mara&& key=="mara"){
-                                            menge = woist.marafull[kk][i]}else
-                                            {menge = woist[key][kk][i]}
+                                        if (timr<160+delay.mara && (key=="mara" || key == "maraslow")){
+                                             menge = woist.marafull[kk][i]}else
+                                            {
+                                                menge = woist[key][kk][i]}
                             
                                         strokec=0
                             stroke = Math.min(10,mengeScale(menge))
@@ -326,10 +334,10 @@ play = false
                             if (menge < 3){stroke=0;rad = 0;strokec=0}
                             col = colorScale[key](menge)
                             
-                            if(timr<delay[key] || timr>cutoff[key]){stroke=0;strokec=0,rad=0}
-                            if(timr<160+delay.mara&& key=="maraslow"){                          
+                            if(timr<delay[key] || timr>cutoff[key]+delay[key]){stroke=0;strokec=0,rad=0}
+                           
+                             if(timr<160+delay.mara && key=="maraslow"){                          
                                 stroke=0;strokec=0,rad=0}
-                            
                             
                             pointjsons[key].features[i+1].properties.radius = rad
                             pointjsons[key].features[i+1].properties.stroke = strokec
@@ -356,26 +364,42 @@ play = false
                             map.getSource('circles'+key).setData(pointjsons[key])
                             
                         
-                        
-                        
+                         
+                         console.log(delay)
+
+                         filast[key]  = findIndices(woist[key][kk],key)// findIndices findFirstAndLastNonZero(woist[key][kk],key)
+                         
                         }
-                        temp = Math.round(Math.max(0,timr-delay.mara)*3.136)
-                        if (temp > 0 && temp <coordinates.mara.length-1) {markers[10].setLngLat(coordinates.mara[temp])}else{markers[10].setLngLat([0,0])}
+                           console.log(filast)
+                    //    temp = Math.round(Math.max(0,timr-delay.mara)*3.136)
 
-                        temp = Math.round(Math.max(0,timr-delay.half)*3.136)
-                        if (temp > 0 && temp <coordinates.half.length-1) {markers[11].setLngLat(coordinates.half[temp])}else{markers[11].setLngLat([0,0])}
+                    if (filast.mara[0] != 0 ) {markers[10].setLngLat(coordinates.mara[filast.mara[0]+1])}else{markers[10].setLngLat([0,0])}
+                       
+                    
+                    if  (timr<160+delay.mara){
+                        if (filast.maraslow[1] != 0  ) {markers[16].setLngLat(coordinates.maraslow[filast.maraslow[1]])}else{markers[16].setLngLat([0,0])}}
+                    else{
+                            if (filast.maraslow[1] != 0  ) {
+                            markers[17].setLngLat(coordinates.maraslow[filast.maraslow[1]-1])}else{markers[17].setLngLat([0,0])}
 
-                        temp = Math.round(Math.max(0,timr-delay.tenkm)*3.3333)
-                        if (temp > 0 && temp <coordinates.tenkm.length-1) {markers[12].setLngLat(coordinates.tenkm[temp])}else{markers[12].setLngLat([0,0])}
-
-                        temp = Math.round(Math.max(0,timr-delay.fivekm)*3.57)
-                        if (temp > 0 && temp <coordinates.fivekm.length-1) {markers[13].setLngLat(coordinates.fivekm[temp])}else{markers[13].setLngLat([0,0])}
-
-                        temp = Math.round(Math.max(0,timr-delay.twofivekm)*2.555)
-                        if (temp > 0 && temp <coordinates.twofivekm.length-1) {markers[14].setLngLat(coordinates.twofivekm[temp])}else{markers[14].setLngLat([0,0])}
-
-
-    }
+                         if (filast.mara[1] != 0  ) {markers[16].setLngLat(coordinates.mara[filast.mara[1]-1])}else{markers[16].setLngLat([0,0])}
+                    
+                }
+                        
+                        if (filast.half[0] != 0 ) {markers[11].setLngLat(coordinates.half[filast.half[0]+1])}else{markers[11].setLngLat([0,0])}
+                        if (filast.half[1] != 0  ) {markers[18].setLngLat(coordinates.half[filast.half[1]-1])}else{markers[18].setLngLat([0,0])}
+                        
+                        if (filast.tenkm[0] != 0 ) {markers[12].setLngLat(coordinates.tenkm[filast.tenkm[0]+1])}else{markers[12].setLngLat([0,0])}
+                        if (filast.tenkm[1] != 0  ) {markers[19].setLngLat(coordinates.tenkm[filast.tenkm[1]-1])}else{markers[19].setLngLat([0,0])}
+                      
+                        if (filast.fivekm[0] != 0 ) {markers[13].setLngLat(coordinates.fivekm[filast.fivekm[0]+1])}else{markers[13].setLngLat([0,0])}
+                        if (filast.fivekm[1] != 0  ) {markers[20].setLngLat(coordinates.fivekm[filast.fivekm[1]-1])}else{markers[20].setLngLat([0,0])}
+      
+                        if (filast.twofivekm[0] != 0 ) {markers[14].setLngLat(coordinates.twofivekm[filast.twofivekm[0]])}else{markers[14].setLngLat([0,0])}
+                      if (filast.twofivekm[1] != 0  ) {markers[21].setLngLat(coordinates.twofivekm[filast.twofivekm[1]])}else{markers[21].setLngLat([0,0])}
+      
+                  
+    } 
  // button zum absoielen
                         
                                 setInterval(function (){
@@ -386,16 +410,52 @@ play = false
                                     if (realtime == true){
                                         
                                        now = new Date()
-                                      tim = (now.getHours() * 60) +now.getMinutes()
+                                      tim2 = (now.getHours() * 60) +now.getMinutes()
                                   //      tim -= 120 
-                                    if (tim > 359.9 && tim < 900.1 )  {  zeitgewahlt(Math.round(tim) )}else{realtime = false;d3.select('#realbutton').text('no realtime!')}
-                                    console.log("realtime eingestellt " + now + "  " + tim)}
+                                    if (tim2 > 359.9 && tim2 < 900.1 )  {  zeitgewahlt(Math.round(tim2) )}
+}
                             },50)
                                 
-
+                            function findIndices(arr,key) {
+    let firstIndex = -1;
+    let lastIndex = -1;
+if(!arr){arr =[0]}
+    // Loop through the array to find the first and last index
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] > 2) {
+            if (firstIndex === -1) {
+                firstIndex = i; // Assign the first index
+            }
+            lastIndex = i; // Update the last index
+        }
+    }
+    if(lastIndex > coordinates[key].length-5||lastIndex ==NaN||lastIndex <0){lastIndex=0}
+    if(firstIndex > coordinates[key].length-5||firstIndex ==NaN||firstIndex <0){firstIndex=0}
+    return [ lastIndex,firstIndex ];
+}
 
                            
+                            function findFirstAndLastNonZero(arr,key) {
+    let firstNonZero = null;
+    let lastNonZero = null;
+if(arr)
+    {for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== 0) {
+            if (firstNonZero === null) {
+                firstNonZero = i;
+            }
+            lastNonZero = i;
+        }
+    }
+}else{ firstNonZero=0
+     lastNonZero =0}
+     
+     if(firstNonZero == null || lastNonZero ==null){firstNonZero=0
+        lastNonZero =0}
 
+        if(lastNonZero > coordinates[key].length-5){lastNonZero=0}
+    return  [ lastNonZero,firstNonZero] ;
+}
 
 
 
@@ -507,6 +567,7 @@ function initialise_map()  {
       closeOnClick: false
     });
         for (const key in coordinates) {
+            if(key=="twofivekm"){console.log("25 gemalt")}
                                                         map.addSource('line-segments'+key, {
                                                             "type": "geojson",
                                                             "data": linejsons[key]
