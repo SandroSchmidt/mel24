@@ -333,7 +333,8 @@ play = false
                                         strokec=0
                             stroke = Math.min(10,mengeScale(menge))
                             rad = Math.min(10, mengeScale(menge))
-                            if (menge < 3){stroke=0;rad = 0;strokec=0}
+                            if (menge < 3){stroke=1;rad = 1;strokec=1}
+                            if (menge < 2){stroke=0;rad = 0;strokec=0}
                             col = colorScale[key](menge)
                             
                             if(timr<delay[key] || timr>cutoff[key]+delay[key]){stroke=0;strokec=0,rad=0}
@@ -424,7 +425,7 @@ play = false
 if(!arr){arr =[0]}
     // Loop through the array to find the first and last index
     for (let i = 0; i < arr.length; i++) {
-        if (arr[i] > 2) {
+        if (arr[i] > 0) {
             if (firstIndex === -1) {
                 firstIndex = i; // Assign the first index
             }
@@ -433,6 +434,7 @@ if(!arr){arr =[0]}
     }
     if(lastIndex > coordinates[key].length-5||lastIndex ==NaN||lastIndex <0){lastIndex=0}
     if(firstIndex > coordinates[key].length-5||firstIndex ==NaN||firstIndex <0){firstIndex=0}
+
     return [ lastIndex,firstIndex ];
 }
 
