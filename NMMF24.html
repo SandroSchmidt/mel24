@@ -296,10 +296,12 @@ play = false
 
  function zeitgewahlt(timr)
     {
+        /*
         console.log("marad: " +delay.mara + " * " + delay.maraslow + " 22 " +delay.marafull)
-        for(f=10;f<21;f++){
-            markers[f].setLngLat([0,0])
+        for(f=10;f<20;f++){
+          //  markers[f].setLngLat([0,0])
         }
+          */
     //tim=timr        
         d3.select("#myRange").property("value", timr);
         d3.select('#uhr').text(convertMinutesToTime(Math.round(timr)))
