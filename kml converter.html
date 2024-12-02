@@ -89,7 +89,7 @@ document.getElementById('cvsInput').addEventListener('change', function(event) {
     readCSV(file, function(columns) {
         console.log(columns);
 
-        laufer ={mara:[],half:[],tenkm:[],fivekm:[],twofivekm:[]}
+        laufer ={mara:[],half:[],tenkm:[]} // ,fivekm:[],twofivekm:[]
         for(i=0;i<columns.mara1.length;i++){
 if(columns.mara2[i] != undefined){
             start = timeToSeconds(columns.mara2[i])-timeToSeconds(columns.mara1[i])
@@ -112,6 +112,7 @@ if(columns.ten2[i] != undefined){
             laufer.tenkm.push([start,speed])
 }
         }
+        /*
         for(i=0;i<columns.five1.length;i++){
 if(columns.five2[i] != undefined){
             start = timeToSeconds(columns.five2[i])-timeToSeconds(columns.five1[i])
@@ -126,7 +127,8 @@ if(columns.two2[i] != undefined){
             speed = 2500/ (timeToSeconds(columns.two1[i]))
             laufer.twofivekm.push([start,speed])
 }
-        }
+            
+        }*/
         console.log(laufer)
 
 
