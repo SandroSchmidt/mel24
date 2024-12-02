@@ -175,6 +175,10 @@ if (coltoggle){
     }
 </style>
 <script>
+       coordinates.mara.forEach((item) => {
+item[1] = item[1]+0.00003;
+item[0] = item[0]+0.00003}
+ )
 colorScale = {mara:d3.scaleLinear()
             .domain([0, 15,40])  // Input domain
             .range([ "green","yellow","red"]),
