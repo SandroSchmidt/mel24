@@ -50,6 +50,8 @@
                     }
                 });
         console.log(fikoliste)
+        console.log("TT: " )
+        console.log( addIntermediatePoints(fikoliste))
         fikoliste= processPath(fikoliste, 10);
         console.log(fikoliste)
             };
@@ -278,6 +280,54 @@ function countOccurrences(arr, tolerancePercentage) {
             return Math.round(totalDistance);
         }
 
+
+        function addIntermediatePoints(coords) {
+    const EARTH_RADIUS = 6371000; // Earth's radius in meters
+
+    // Helper function to calculate intermediate points
+    function interpolate(lat1, lon1, lat2, lon2, t) {
+        const toRadians = (deg) => (deg * Math.PI) / 180;
+        const toDegrees = (rad) => (rad * 180) / Math.PI;
+
+        lat1 = toRadians(lat1);
+        lon1 = toRadians(lon1);
+        lat2 = toRadians(lat2);
+        lon2 = toRadians(lon2);
+
+        const deltaLat = lat2 - lat1;
+        const deltaLon = lon2 - lon1;
+
+        const newLat = lat1 + t * deltaLat;
+        const newLon = lon1 + t * deltaLon;
+
+        return [toDegrees(newLat), toDegrees(newLon)];
+    }
+
+    let result = [];
+
+    for (let i = 0; i < coords.length - 1; i++) {
+        const [lat1, lon1] = coords[i];
+        const [lat2, lon2] = coords[i + 1];
+
+        // Add the starting point of the segment
+        result.push([lat1, lon1]);
+
+        // Add 3 intermediate points (t = 0.25, 0.5, 0.75)
+        for (let t = 0.25; t < 1; t += 0.25) {
+            result.push(interpolate(lat1, lon1, lat2, lon2, t));
+        }
+    }
+
+    // Add the final point
+    result.push(coords[coords.length - 1]);
+
+    return result;
+}
+
+
+
+
+
         function interpolatePoints(coord1, coord2, maxDistance) {
     const distance = haversine(coord1, coord2);
     const numPoints = Math.ceil(distance / maxDistance);
@@ -362,10 +412,11 @@ for (i=0;i<listofdistances.length;i++){
 svg_toggle =false
 function draw_shit(){
    // if(svg != undefined) {svg.remove()}
-
+   fikoliste = addIntermediatePoints(fikoliste)
     if (svg_toggle==false) {svg =d3.select('#diver').append('svg').attr("width",1000).attr("height",500).style("background-color","red")
 svg_toggle= true
 }
+/*
     for (k=0;k<json_path.length-1;k++){
 tempx = 500+ ((json_path[k].coordinates[0]-json_path[0].coordinates[0])*10000)
 tempy = 200-((json_path[k].coordinates[1]-json_path[0].coordinates[1])*10000)
@@ -376,6 +427,7 @@ svg.append('line').attr("y1",tempy).attr("y2",tempy2).attr("x1",tempx).attr("x2"
 svg.append("circle").attr("r",1).attr('cx',tempx).attr('cy',tempy).style('fill',"green")
 //svg.append("text").attr("x",tempx).attr("y",tempy).text(k*100).style("font-weight",2)
     }
+*/
 
     for(i=0;i<fikoliste.length;i+=5){
         tempx = 500+ (fikoliste[i][0]-fikoliste[0][0])*10000

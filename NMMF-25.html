@@ -27,6 +27,36 @@
 </style>
 <body>
     <button id="vbut" onclick="variante1 = !variante1;if(variante1){d3.select('#vbut').text('Variant 1');selector = 0}else{d3.select('#vbut').text('Variant 2');selector = 1};    zeitgewahlt(Math.round(tim) )">Variant 1</button>
+
+    <button id="cvbut" onclick="roadvariante1 = !roadvariante1;
+    if(roadvariante1){d3.select('#cvbut').text('route 1'); coordinates = coordinatesold;console.log('alteccord')
+    for (const key in coordinates) {
+        for (i=0;i<coordinatesold[key].length-1;i++){
+            pointjsons[key].features[i].geometry.coordinates = coordinatesold[key][i];
+          linejsons[key].features[i].geometry.coordinates = [coordinatesold[key][i],coordinatesold[key][i+1]]
+      
+        }
+        map.getSource('line-segments'+key).setData(linejsons[key])
+        map.getSource('circles'+key).setData(pointjsons[key])
+    }
+    }
+    else{d3.select('#cvbut').text('route 2'); coordinates = coordinatesnew;;console.log('neueccord')
+    for (const key in coordinates) {
+        for (i=0;i<coordinatesnew[key].length-1;i++){
+            pointjsons[key].features[i].geometry.coordinates = coordinatesnew[key][i];
+          linejsons[key].features[i].geometry.coordinates = [coordinatesnew[key][i],coordinatesnew[key][i+1]]
+      
+        }
+        map.getSource('line-segments'+key).setData(linejsons[key])
+        map.getSource('circles'+key).setData(pointjsons[key])
+    }
+    };  
+    
+    
+
+
+    zeitgewahlt(Math.round(tim) )">route 1</button>
+    
     <button id="playbut" onclick="play = !play;
     if(!play){d3.select('#playbut').text('play')
     zeitgewahlt(Math.round(tim) )
@@ -175,10 +205,16 @@ if (coltoggle){
     }
 </style>
 <script>
-       coordinates.mara.forEach((item) => {
+
+       coordinatesnew.mara.forEach((item) => {
 item[1] = item[1]+0.00003;
 item[0] = item[0]+0.00003}
  )
+ coordinatesold.mara.forEach((item) => {
+item[1] = item[1]+0.00003;
+item[0] = item[0]+0.00003}
+ )
+ let   coordinates = coordinatesold
 colorScale = {mara:d3.scaleLinear()
             .domain([0, 15,40])  // Input domain
             .range([ "green","yellow","red"]),
@@ -196,7 +232,7 @@ colorScale2 = {mara:"red",half:"black",tenkm:"green"}
 
 
 woist = [var1,var2]
-
+roadvariante1 = true
     variante1 = true
     selector = 0
     realtime = false
@@ -373,6 +409,9 @@ play = false
                                 for(i=0;i<coordinates[key].length-1;i++){
                                        
                              
+                                    pointjsons[key].features[i+1].geometry.coordinates = coordinates[key][i+1]
+             //                       linejsons[key].features[i+1].geometry.coordinates = [coordinates[key][i],coordinates[key][i+1]]
+
                                                          
                            pointjsons[key].features[i+1].properties.radius = 0
                            pointjsons[key].features[i+1].properties.stroke = 0
@@ -407,7 +446,7 @@ play = false
  // button zum absoielen
                         
                                 setInterval(function (){
-                                    if (tim>1200){play=false}
+                                    if (tim>839){play=false}
                                     if(play == true){
                                                tim= tim + autoplayspeed;
                                         zeitgewahlt(Math.round(tim) )}
