@@ -70,6 +70,7 @@ realtime = false
 
     ">play</button>
 
+
 <!--
      <button id="realbutton" onclick="realtime = !realtime;
      console.log(tim)
@@ -198,6 +199,24 @@ if (coltoggle){
 
 ">color scheme</button>
 -->
+
+<table>
+           
+    <tr>
+        <td>marathon start:</td>
+        <td><input id="maratimset" type="time" value="12:01" onchange="delay.mara = convertTimeToMinutes(this.value);delay.maraslow = convertTimeToMinutes(this.value);delay.marafull = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
+    </tr>
+    <tr>
+        <td>half marathon start:</td>
+        <td><input id="halftimset" type="time" value="12:01" onchange="delay.half = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
+    </tr>
+    <tr>
+        <td>10 km start:</td>
+        <td> <input id="tenkmtimset" type="time" value="12:01" onchange="delay.tenkm = convertTimeToMinutes(this.value); zeitgewahlt(Math.round(tim));   localStorage.setItem(key, JSON.stringify(delay));"/></td>
+    </tr>
+
+
+
 </body>
 <style>
     body {
@@ -300,7 +319,27 @@ racenames={mara:"marathon",half:"halfmarathon",tenkm:"10km run"}
 
 
 // Check if the value exists
+
+key= "delay"
+const value = localStorage.getItem(key);
 delay={mara:(6.5*60),half:(8*60),tenkm:(7*60)}
+if (value !== null) {
+  delay = JSON.parse(value)
+  console.log(JSON.parse(value));
+  console.log("gelesen von locals")
+} else {
+    delay={mara:(6.5*60),half:(8*60),tenkm:(7*60)}
+    localStorage.setItem(key, JSON.stringify(delay));
+    console.log('did not exist in local storage.')
+
+}
+
+
+
+
+
+
+
 
 
 tim =60*6.25
